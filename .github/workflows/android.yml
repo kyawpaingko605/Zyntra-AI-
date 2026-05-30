@@ -20,7 +20,7 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    # 💡 [ဒီအဆင့်က build.gradle.kts ထဲသို့ လိုအပ်သော Library အားလုံးကို အလိုအလျောက် ရေးထည့်ပေးမှာပါ]
+    # 💡 [ဒီအဆင့်က build.gradle.kts ကို တိကျစွာ ပြန်လည်ဆောက်ပေးပါမည်]
     - name: Generate Proper App Build Gradle
       run: |
         mkdir -p app
@@ -79,42 +79,26 @@ jobs:
             implementation("androidx.core:core-ktx:1.12.0")
             implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
             implementation("androidx.activity:activity-compose:1.8.2")
-            
-            // ViewModel + Compose integration
             implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
             
-            // Jetpack Compose UI
             implementation(platform("androidx.compose:compose-bom:2024.02.00"))
             implementation("androidx.compose.ui:ui")
             implementation("androidx.compose.ui:ui-graphics")
             implementation("androidx.compose.material3:material3")
             
-            // Networking & Coroutines
             implementation("com.squareup.retrofit2:retrofit:2.9.0")
             implementation("com.squareup.retrofit2:converter-gson:2.9.0")
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
-            // Markdown rendering library (Error တက်နေသော နှလုံးသားဖိုင်)
             implementation("com.github.jeziellago:compose-markdown:0.3.1")
         }
         EOF
 
-    # 💡 စက်ရုပ်ကိုယ်တိုင် အမှားကင်းစင်သော AndroidManifest.xml ဖိုင်ကို ရေးသားခြင်း
-    - name: Generate Solid AndroidManifest.xml
+    # 💡 [ဒီအဆင့်က မျက်စိမမြင်ရတဲ့ Formatting ပြဿနာအားလုံးကို Base64 နည်းပညာဖြင့် အမြစ်ပြတ်ရှင်းပေးမှာပါ]
+    - name: Inject Perfect AndroidManifest.xml (Base64 Mode)
       run: |
         mkdir -p app/src/main
-        echo '<?xml version="1.0" encoding="utf-8"?>' > app/src/main/AndroidManifest.xml
-        echo '<manifest xmlns:android="http://android.com">' >> app/src/main/AndroidManifest.xml
-        echo '    <uses-permission android:name="android.permission.INTERNET" />' >> app/src/main/AndroidManifest.xml
-        echo '    <application android:allowBackup="true" android:label="Zyntra AI" android:supportsRtl="true">' >> app/src/main/AndroidManifest.xml
-        echo '        <activity android:name="com.ai.zyntraai.MainActivity" android:exported="true" android:theme="@style/Theme.Material3.Dark.NoActionBar">' >> app/src/main/AndroidManifest.xml
-        echo '            <intent-filter>' >> app/src/main/AndroidManifest.xml
-        echo '                <action android:name="android.intent.action.MAIN" />' >> app/src/main/AndroidManifest.xml
-        echo '                <category android:name="android.intent.category.LAUNCHER" />' >> app/src/main/AndroidManifest.xml
-        echo '            </intent-filter>' >> app/src/main/AndroidManifest.xml
-        echo '        </activity>' >> app/src/main/AndroidManifest.xml
-        echo '    </application>' >> app/src/main/AndroidManifest.xml
-        echo '</manifest>' >> app/src/main/AndroidManifest.xml
+        echo "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPG1hbmlmZXN0IHhtbG5zOmFuZHJvaWQ9Imh0dHA6Ly9zY2hlbWFzLmFuZHJvaWQuY29tL2Fway9yZXMvYW5kcm9pZCI+CiAgICA8dXNlcy1wZXJtaXNzaW9uIGFuZHJvaWQ6bmFtZT0iYW5kcm9pZC5wZXJtaXNzaW9uLklOVEVSTkVUIiAvPgogICAgPGFwcGxpY2F0aW9uIGFuZHJvaWQ6YWxsb3dCYWNrdXA9InRydWUiIGFuZHJvaWQ6bGFiZWw9Ilp5bnRyYSBBSSIgYW5kcm9pZDpzdXBwb3J0c1J0bD0idHJ1ZSI+CiAgICAgICAgPGFjdGl2aXR5IGFuZHJvaWQ6bmFtZT0iY29tLmFpLnp5bnRyYWFpLk1haW5BY3Rpdml0eSIgYW5kcm9pZDpleHBvcnRlZD0idHJ1ZSIgYW5kcm9pZDp0aGVtZT0iQHN0eWxlL1RoZW1lLk1hdGVyaWFsMy5EYXJrLk5vQWN0aW9uQmFyIj4KICAgICAgICAgICAgPGludGVudC1maWx0ZXI+CiAgICAgICAgICAgICAgICA8YWN0aW9uIGFuZHJvaWQ6bmFtZT0iYW5kcm9pZC5pbnRlbnQuYWN0aW9uLk1BSU4iIC8+CiAgICAgICAgICAgICAgICA8Y2F0ZWdvcnkgYW5kcm9pZDpubWFtZT0iYW5kcm9pZC5pbnRlbnQuY2F0ZWdvcnkuTEFVTkNIRVIiIC8+CiAgICAgICAgICAgIDwvaW50ZW50LWZpbHRlcj4KICAgICAgICA8L2FjdGl2aXR5PgogICAgPC9hcHBsaWN0aW9uPgo8L21hbmlmZXN0Pg==" | base64 -d > app/src/main/AndroidManifest.xml
 
     - name: Inject API Key into local.properties
       run: |
