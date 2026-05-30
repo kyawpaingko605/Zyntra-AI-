@@ -1,4 +1,4 @@
-package com.ai.zyntraai // 👈 Package name အသစ်ပြောင်းလဲထားသည်
+package com.ai.zyntraai // 👈 သင့်ရဲ့ Package Name အမှန်အတိုင်း ထားရှိပါ
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -14,7 +14,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.AutoAwesome
+// 🛠️ Icons Extended စာကြည့်တိုက်အစား အခြေခံ Icon ကို သုံးရန် ပြင်ဆင်ထားသည်
+import androidx.compose.material.icons.filled.Star 
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,7 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import dev.jeziellago.compose.markdown.MarkdownText
+// 🛠️ Markdown သီးသန့် Import တန်းကို တိကျအောင် ဖြည့်စွက်ထားသည်
+import dev.jeziellago.compose.markdown.MarkdownText 
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
@@ -35,13 +37,13 @@ import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.POST
 
-// Zyntra Color Palette (Electric Purple Vibe)
+// Zyntra Color Palette
 val ZyntraPrimary = Color(0xFF7C4DFF) 
 val ZyntraBackground = Color(0xFF14121F)
 val ZyntraSurface = Color(0xFF211D36)
 val ZyntraBubbleAI = Color(0xFF2A244D)
 
-// ======= [1. BACKEND LOGIC: PRODUCTION API NETWORKING] =======
+// ======= [1. BACKEND LOGIC: API NETWORKING] =======
 
 data class OpenAIRequest(val model: String = "gpt-3.5-turbo", val messages: List<ApiMessage>)
 data class ApiMessage(val role: String, val content: String)
@@ -74,7 +76,6 @@ class ChatViewModel : ViewModel() {
     var messages by mutableStateOf(listOf<ChatMessage>())
     var isLoading by mutableStateOf(false)
 
-    // GitHub Secrets ကတစ်ဆင့် local.properties ထဲဝင်လာမည့် API Key ကို ယူသုံးခြင်း
     private val apiKey = "Bearer ${BuildConfig.OPENAI_API_KEY}" 
 
     fun sendMessage(text: String, onComplete: () -> Unit) {
@@ -95,14 +96,14 @@ class ChatViewModel : ViewModel() {
                 )
                 
                 val aiResponseText = response.choices.firstOrNull()?.message?.content 
-                    ?: "Error: မည်သည့်အဖြေမှ ပြန်မကျလာပါ သို့မဟုတ် Key သက်တမ်းကုန်နေပါသည်။"
+                    ?: "Error: အဖြေမရရှိပါ။"
                 
                 messages = messages + ChatMessage(id = System.nanoTime().toString(), text = aiResponseText, isUser = false)
                 
             } catch (e: Exception) {
                 messages = messages + ChatMessage(
                     id = System.nanoTime().toString(), 
-                    text = "Zyntra AI နှင့် ချိတ်ဆက်မှု မအောင်မြင်ပါ: ${e.localizedMessage}\n\nကျေးဇူးပြု၍ သင်၏ OpenAI API Key သည် အလုပ်လုပ်ဆဲဖြစ်ကြောင်းနှင့် Credits ရှိကြောင်း သေချာပါစေ။", 
+                    text = "Zyntra AI နှင့် ချိတ်ဆက်မှု မအောင်မြင်ပါ: ${e.localizedMessage}", 
                     isUser = false
                 )
             } finally {
@@ -120,7 +121,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                ZyntraMainScreen()
+                val myViewModel: ChatViewModel = viewModel() // 🛠️ Function invocation error ကို ဖြေရှင်းထားသည်
+                ZyntraMainScreen(myViewModel)
             }
         }
     }
@@ -128,7 +130,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ZyntraMainScreen(viewModel: ChatViewModel = viewModel()) {
+fun ZyntraMainScreen(viewModel: ChatViewModel) {
     var inputMessage by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -138,7 +140,7 @@ fun ZyntraMainScreen(viewModel: ChatViewModel = viewModel()) {
             TopAppBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.AutoAwesome, "AI", tint = ZyntraPrimary, modifier = Modifier.size(24.dp))
+                        Icon(Icons.Default.Star, "AI", tint = ZyntraPrimary, modifier = Modifier.size(24.dp))
                         Spacer(modifier = Modifier.width(10.dp))
                         Text("Zyntra AI", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     }
@@ -201,7 +203,7 @@ fun ChatRowItem(message: ChatMessage) {
             Icon(Icons.Default.AccountCircle, "User", tint = Color.LightGray, modifier = Modifier.size(32.dp))
         } else {
             Box(modifier = Modifier.size(32.dp).clip(RoundedCornerShape(4.dp)).background(ZyntraPrimary), contentAlignment = Alignment.Center) {
-                Icon(Icons.Default.AutoAwesome, "AI", tint = Color.White, modifier = Modifier.size(20.dp))
+                Icon(Icons.Default.Star, "AI", tint = Color.White, modifier = Modifier.size(20.dp))
             }
         }
         Spacer(modifier = Modifier.width(16.dp))
