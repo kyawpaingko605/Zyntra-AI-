@@ -1,4 +1,4 @@
-package com.zyntraai // 👈 Package နာမည်ကို com.zyntraai သို့ လဲလှယ်ထားပါသည်
+package com.zyntraai
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import dev.jeziellago.compose.markdown.MarkdownText 
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
@@ -59,7 +58,7 @@ interface OpenAiService {
 object RetrofitClient {
     val instance: OpenAiService by lazy {
         Retrofit.Builder()
-            .baseUrl("https://openai.com")
+            .baseUrl("https://api.openai.com/") // 👈 Base URL လမ်းကြောင်းမှန်အောင် ပြင်ဆင်ထားသည်
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(OpenAiService::class.java)
@@ -206,7 +205,13 @@ fun ChatRowItem(message: ChatMessage) {
         }
         Spacer(modifier = Modifier.width(16.dp))
         Box(modifier = Modifier.weight(1f).animateContentSize()) {
-            MarkdownText(markdown = message.text, color = Color(0xFFECECF1), fontSize = 16.sp, modifier = Modifier.fillMaxWidth())
+            // 🛠️ ပြဿနာရှာနေသော MarkdownText အစား Standard Compose Text ကို ပြောင်းသုံးထားသည်
+            Text(
+                text = message.text, 
+                color = Color(0xFFECECF1), 
+                fontSize = 16.sp, 
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
