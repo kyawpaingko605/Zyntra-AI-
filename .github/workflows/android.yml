@@ -1,0 +1,38 @@
+name: Zyntra AI CI Build
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+
+    # GitHub Secrets ထဲက OPENAI_API_KEY ကို ယူပြီး local.properties ထဲသို့ အလိုအလျောက် ထိုးထည့်ပေးခြင်း
+    - name: Inject API Key into local.properties
+      run: |
+        echo "OPENAI_API_KEY=\"${{ secrets.OPENAI_API_KEY }}\"" > local.properties
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build with Gradle (Assemble Debug APK)
+      run: ./gradlew assembleDebug
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: zyntra-ai-debug-apk
+        path: app/build/outputs/apk/debug/app-debug.apk
