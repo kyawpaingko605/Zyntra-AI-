@@ -1,26 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://android.com">
+<manifest xmlns:android="http://android.com" package="com.ai.zyntraai">
 
-    <!-- 🌐 အင်တာနက် ခွင့်ပြုချက် (ကုဒ်တန်း အမှန်) -->
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:allowBackup="true"
         android:label="Zyntra AI"
         android:supportsRtl="true">
         
-        <!-- 📱 MainActivity လမ်းကြောင်း (ကုဒ်တန်း အမှန်) -->
         <activity
             android:name="com.ai.zyntraai.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Material3.Dark.NoActionBar">
-            
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            
         </activity>
+        
     </application>
-
 </manifest>
