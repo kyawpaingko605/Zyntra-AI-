@@ -20,7 +20,7 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    # 🛠️ ၁။ app/build.gradle.kts ကို တိကျစွာ ဆောက်ခြင်း
+    # 🛠️ ၁။ app/build.gradle.kts ကို စက်ရုပ်စနစ်ဖြင့် အမှားအယွင်းမရှိ တိုက်ရိုက်ဆောက်ခြင်း
     - name: Force Generate App Build Gradle
       run: |
         mkdir -p app
@@ -94,13 +94,13 @@ jobs:
         }
         EOF
 
-    # 🛠️ ၂။ AndroidManifest.xml ကို အမှားကင်းစင်အောင် ဆောက်ခြင်း (Base64)
+    # 🛠️ ၂။ AndroidManifest.xml ကို အမှားကင်းစင်အောင် ဆောက်ခြင်း (Base64 အမှန်)
     - name: Inject Perfect AndroidManifest.xml
       run: |
         mkdir -p app/src/main
         echo "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPG1hbmlmZXN0IHhtbG5zOmFuZHJvaWQ9Imh0dHA6Ly9zY2hlbWFzLmFuZHJvaWQuY29tL2Fway9yZXMvYW5kcm9pZCI+CiAgICA8dXNlcy1wZXJtaXNzaW9uIGFuZHJvaWQ6bmFtZT0iYW5kcm9pZC5wZXJtaXNzaW9uLklOVEVSTkVUIiAvPgogICAgPGFwcGxpY2F0aW9uIGFuZHJvaWQ6YWxsb3dCYWNrdXA9InRydWUiIGFuZHJvaWQ6bGFiZWw9Ilp5bnRyYSBBSSIgYW5kcm9pZDpzdXBwb3J0c1J0bD0idHJ1ZSI+CiAgICAgICAgPGFjdGl2aXR5IGFuZHJvaWQ6bmFtZT0iY29tLnp5bnRyYWFpLk1haW5BY3Rpdml0eSIgYW5kcm9pZDpleHBvcnRlZD0idHJ1ZSIgYW5kcm9pZDp0aGVtZT0iQHN0eWxlL1RoZW1lLk1hdGVyaWFsMy5EYXJrLk5vQWN0aW9uQmFyIj4KICAgICAgICAgICAgPGludGVudC1maWx0ZXI+CiAgICAgICAgICAgICAgICA8YWN0aW9uIGFuZHJvaWQ6bmFtZT0iYW5kcm9pZC5pbnRlbnQuYWN0aW9uLk1BSU4iIC8+CiAgICAgICAgICAgICAgICA8Y2F0ZWdvcnkgYW5kcm9pZDpuYW1lPSJhbmRyb2lkLmludGVudC5jYXRlZ29yeS5MQVVOQ0hFUiIgLz4KICAgICAgICAgICAgPC9pbnRlbnQtZmlsdGVyPgogICAgICAgIDwvYWN0aXZpdHk+CiAgICA8L2FwcGxpY2F0aW9uPgo8L21hbmlmZXN0Pg==" | base64 -d > app/src/main/AndroidManifest.xml
 
-    # 🛠️ ၃။ MainActivity.kt ကို တိုက်ရိုက် ရေးသားခြင်း
+    # 🛠️ ၃။ MainActivity.kt ကို တိုက်ရိုက်ဆောက်ခြင်း
     - name: Generate Proper MainActivity.kt
       run: |
         mkdir -p app/src/main/java/com/zyntraai
