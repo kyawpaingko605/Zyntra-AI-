@@ -20,7 +20,26 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    # GitHub Secrets ထဲက OPENAI_API_KEY ကို ယူပြီး local.properties ထဲသို့ အလိုအလျောက် ထိုးထည့်ပေးခြင်း
+    # 💡 [ဒီအဆင့်က Error ကို အပိုင်ရှင်းပေးမှာပါ] စက်ရုပ်ကိုယ်တိုင် အမှားကင်းစင်သော AndroidManifest.xml ဖိုင်ကို ရေးသားခြင်း
+    - name: Force Generate Clean AndroidManifest.xml
+      run: |
+        mkdir -p app/src/main
+        cat << 'EOF' > app/src/main/AndroidManifest.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <manifest xmlns:android="http://android.com">
+            <uses-permission android:name="android.permission.INTERNET" />
+            <application android:allowBackup="true" android:label="Zyntra AI" android:supportsRtl="true">
+                <activity android:name="com.ai.zyntraai.MainActivity" android:exported="true" android:theme="@style/Theme.Material3.Dark.NoActionBar">
+                    <intent-filter>
+                        <action android:name="android.intent.action.MAIN" />
+                        <category android:name="android.intent.category.LAUNCHER" />
+                    </intent-filter>
+                </activity>
+            </application>
+        </manifest>
+        EOF
+
+    # GitHub Secrets ထဲက OPENAI_API_KEY ကို local.properties ထဲသို့ ထည့်ပေးခြင်း
     - name: Inject API Key into local.properties
       run: |
         echo "OPENAI_API_KEY=\"${{ secrets.OPENAI_API_KEY }}\"" > local.properties
