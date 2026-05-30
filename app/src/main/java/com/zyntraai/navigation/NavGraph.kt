@@ -1,7 +1,7 @@
 package com.zyntraai.navigation
 
 import androidx.compose.runtime.Composable
-
+import com.zyntraai.ui.voice.VoiceScreen
 import androidx.navigation.compose.*
 
 import com.zyntraai.ui.home.HomeScreen
