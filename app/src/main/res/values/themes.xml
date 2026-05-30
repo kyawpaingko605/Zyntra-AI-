@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- App ရဲ့ Status Bar အရောင်နှင့် Dark UI ဒီဇိုင်းပုံစံကို သတ်မှတ်ခြင်း -->
-    <style name="Theme.Material3.DayNight.NoActionBar" parent="Theme.Material3.Dark.NoActionBar">
+    <!-- AAPT လုံးဝငြင်းလို့မရအောင် အခြေခံအကျဆုံး Android Default Theme အဖြစ် အတည်ပြုခြင်း -->
+    <style name="Theme.Material3.Dark.NoActionBar" parent="android:Theme.Material.NoActionBar">
         <item name="android:statusBarColor">#211D36</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
