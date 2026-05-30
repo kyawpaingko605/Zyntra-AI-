@@ -1,3 +1,5 @@
+import java.util.Properties // 👈 စက်ရုပ် မျက်စိမလည်အောင် ထိပ်ဆုံးကနေ သီးသန့် Import လုပ်ပေးခြင်း
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -14,8 +16,8 @@ android {
         versionCode = 1
         versionName = "1.0"
         
-        // 🛠️ Error တက်စေတဲ့ ကုဒ်ဟောင်းနေရာမှာ လုံခြုံစိတ်ချရတဲ့ နည်းလမ်းအသစ်ဖြင့် အစားထိုးခြင်း
-        val localProperties = java.util.Properties()
+        // 🛠️ Java.util နေရာမှာ အမှားအယွင်းမရှိစေမယ့် လုံခြုံစိတ်ချရသော ကုဒ်တန်းအသစ်
+        val localProperties = Properties()
         val localPropertiesFile = rootProject.file("local.properties")
         if (localPropertiesFile.exists()) {
             localPropertiesFile.inputStream().use { localProperties.load(it) }
