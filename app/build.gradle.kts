@@ -62,5 +62,6 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
-    implementation("com.github.jeziellago:compose-markdown:0.3.1")
+    // Markdown Library စာလုံးပေါင်းမှန်ကန်အောင် ပြင်ဆင်ထားသည်
+    implementation("dev.jeziellago:compose-markdown:0.3.1")
 }
