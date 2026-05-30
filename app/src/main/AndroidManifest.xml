@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://android.com">
 
-    <!-- 🌐 အင်တာနက် သုံးစွဲခွင့် ပေးခြင်း -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application 
         android:allowBackup="true" 
         android:label="@string/app_name" 
         android:supportsRtl="true"
+        <!-- 🛠️ Themes.xml ထဲက နာမည်အသစ်အတိုင်း တိကျစွာ ပြောင်းလဲပြင်ဆင်ထားပါသည် -->
         android:theme="@style/Theme.Material3.DayNight.NoActionBar">
         
-        <!-- 📱 သင့်ရဲ့ MainActivity လမ်းကြောင်းကို မှန်ကန်အောင် ညွှန်းပေးထားသည် -->
         <activity 
             android:name="com.zyntraai.MainActivity" 
             android:exported="true">
