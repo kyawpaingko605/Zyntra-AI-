@@ -4,24 +4,25 @@ plugins {
 }
 
 android {
-    namespace = "com.ai.zyntraai" // 👈 ပြောင်းလဲထားသည်
+    namespace = "com.ai.zyntraai"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.ai.zyntraai" // 👈 ပြောင်းလဲထားသည်
+        applicationId = "com.ai.zyntraai"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
         
+        // 🛠️ Error တက်စေတဲ့ ကုဒ်ဟောင်းနေရာမှာ လုံခြုံစိတ်ချရတဲ့ နည်းလမ်းအသစ်ဖြင့် အစားထိုးခြင်း
         val localProperties = java.util.Properties()
         val localPropertiesFile = rootProject.file("local.properties")
         if (localPropertiesFile.exists()) {
-            localProperties.load(localPropertiesFile.inputStream())
+            localPropertiesFile.inputStream().use { localProperties.load(it) }
         }
-        val apiKey = localProperties.getProperty("OPENAI_API_KEY") ?: "\"\""
+        val apiKey = localProperties.getProperty("OPENAI_API_KEY") ?: ""
         
-        buildConfigField("String", "OPENAI_API_KEY", apiKey)
+        buildConfigField("String", "OPENAI_API_KEY", "\"$apiKey\"")
     }
 
     buildTypes {
