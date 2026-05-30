@@ -20,32 +20,6 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    # 💡 [ဒီအဆင့်က Theme Error တွက် တရားခံအစစ်ကို အပိုင်နှိမ်နင်းခြင်း ဖြစ်ပါသည်]
-    # Android Core ထဲမှာ အမြဲတမ်း အဆင်သင့်ရှိပြီးသား အခြေခံ NoActionBar စနစ်ကို အသုံးပြုပြီး စက်ရုပ်ကို တိုက်ရိုက်ဆောက်ခိုင်းခြင်း
-    - name: Force Overwrite Perfect AndroidManifest.xml
-      run: |
-        mkdir -p app/src/main
-        cat << 'EOF' > app/src/main/AndroidManifest.xml
-        <?xml version="1.0" encoding="utf-8"?>
-        <manifest xmlns:android="http://android.com">
-            <uses-permission android:name="android.permission.INTERNET" />
-            <application 
-                android:allowBackup="true" 
-                android:label="@string/app_name" 
-                android:supportsRtl="true"
-                android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
-                <activity 
-                    android:name="com.zyntraai.MainActivity" 
-                    android:exported="true">
-                    <intent-filter>
-                        <action android:name="android.intent.action.MAIN" />
-                        <category android:name="android.intent.category.LAUNCHER" />
-                    </intent-filter>
-                </activity>
-            </application>
-        </manifest>
-        EOF
-
     - name: Inject API Key into local.properties
       run: |
         echo "OPENAI_API_KEY=\"${{ secrets.OPENAI_API_KEY }}\"" > local.properties
