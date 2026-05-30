@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://android.com">
 
-    <!-- 🌐 ဖုန်းထဲကနေ OpenAI Server ဆီ လှမ်းချိတ်ဆက်နိုင်ရန် အင်တာနက် အသုံးပြုခွင့် -->
+    <!-- 🌐 အင်တာနက် သုံးစွဲခွင့် ပေးခြင်း -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application 
@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Material3.DayNight.NoActionBar">
         
-        <!-- 📱 Zyntra AI App ရဲ့ အဓိက Screen ဖိုင်လမ်းကြောင်း သတ်မှတ်ချက် -->
+        <!-- 📱 သင့်ရဲ့ MainActivity လမ်းကြောင်းကို မှန်ကန်အောင် ညွှန်းပေးထားသည် -->
         <activity 
             android:name="com.zyntraai.MainActivity" 
             android:exported="true">
