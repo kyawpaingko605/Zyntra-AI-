@@ -20,22 +20,11 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    # 💡 [ဒီအဆင့်က Manifest အမှားအားလုံးကို အမြစ်ပြတ် ရှင်းပေးမှာပါ]
-    - name: Rewrite Clean AndroidManifest.xml Directly
+    # 💡 [တရားခံအစစ်ကို အပိုင်နှိမ်နင်းခြင်း] Linux ရဲ့ $ နှောင့်ယှက်မှု မခံရအောင် အမှားကင်းစင်သော Manifest ကို Base64 စစ်စစ်ဖြင့် ထိုးထည့်ခြင်း
+    - name: Inject Valid AndroidManifest.xml (Base64 Safe Mode)
       run: |
         mkdir -p app/src/main
-        printf '<?xml version="1.0" encoding="utf-8"?>\n' > app/src/main/AndroidManifest.xml
-        printf '<manifest xmlns:android="http://android.com">\n' >> app/src/main/AndroidManifest.xml
-        printf '    <uses-permission android:name="android.permission.INTERNET" />\n' >> app/src/main/AndroidManifest.xml
-        printf '    <application android:allowBackup="true" android:label="@string/app_name" android:supportsRtl="true" android:theme="@style/Theme.Material3.DayNight.NoActionBar">\n' >> app/src/main/AndroidManifest.xml
-        printf '        <activity android:name="com.zyntraai.MainActivity" android:exported="true">\n' >> app/src/main/AndroidManifest.xml
-        printf '            <intent-filter>\n' >> app/src/main/AndroidManifest.xml
-        printf '                <action android:name="android.intent.action.MAIN" />\n' >> app/src/main/AndroidManifest.xml
-        printf '                <category android:name="android.intent.category.LAUNCHER" />\n' >> app/src/main/AndroidManifest.xml
-        printf '            </intent-filter>\n' >> app/src/main/AndroidManifest.xml
-        printf '        </activity>\n' >> app/src/main/AndroidManifest.xml
-        printf '    </application>\n' >> app/src/main/AndroidManifest.xml
-        printf '</manifest>\n' >> app/src/main/AndroidManifest.xml
+        echo "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPG1hbmlmZXN0IHhtbG5zOmFuZHJvaWQ9Imh0dHA6Ly9zY2hlbWFzLmFuZHJvaWQuY29tL2Fway9yZXMvYW5kcm9pZCI+CiAgICA8dXNlcy1wZXJtaXNzaW9uIGFuZHJvaWQ6bmFtZT0iYW5kcm9pZC5wZXJtaXNzaW9uLklOVEVSTkVUIiAvPgogICAgPGFwcGxpY2F0aW9uIGFuZHJvaWQ6YWxsb3dCYWNrdXA9InRydWUiIGFuZHJvaWQ6bGFiZWw9IkBzdHJpbmcvYXBwX25hbWUiIGFuZHJvaWQ6c3VwcG9ydHNSdGw9InRydWUiIGFuZHJvaWQ6dGhlbWU9IkBzdHlsZS9UaGVtZS5NYXRlcmlhbDMuRGF5TmlnaHQuTm9BY3Rpb25CYXIiPgogICAgICAgIDxhY3Rpdml0eSBhbmRyb2lkOm5hbWU9ImNvbS56eW50cmFhaS5NYWluQWN0aXZpdHkiIGFuZHJvaWQ6ZXhwb3J0ZWQ9InRydWUiPgogICAgICAgICAgICA8aW50ZW50LWZpbHRlcj4KICAgICAgICAgICAgICAgIDxhY3Rpb24gYW5kcm9pZDpuYW1lPSJhbmRyb2lkLmludGVudC5hY3Rpb24uTUFJTiIgLz4KICAgICAgICAgICAgICAgIDxjYXRlZ29yeSBhbmRyb2lkOm5hbWU9ImFuZHJvaWQuaW50ZW50LmNhdGVnb3J5LkxBVU5DSEVSIiAvPgogICAgICAgICAgICA8L2ludGVudC1maWx0ZXI+CiAgICAgICAgPC9hY3Rpdml0eT4KICAgIDwvYXBwbGljYXRpb24+CjwvbWFuaWZlc3Q+" | base64 -d > app/src/main/AndroidManifest.xml
 
     - name: Inject API Key into local.properties
       run: |
