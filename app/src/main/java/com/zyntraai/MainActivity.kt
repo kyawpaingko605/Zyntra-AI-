@@ -3,6 +3,7 @@ package com.zyntraai
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,8 +17,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Close
+// 🛠️ Icon အမှားများကို နေရာမှန်ဖြစ်သော .Rounded နှင့် .AutoMirrored သို့ ပြောင်းလဲပြင်ဆင်ထားသည်
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.VolumeMute
+import androidx.compose.material.icons.filled.VolumeOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -39,11 +41,11 @@ import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.POST
 
-// ပုံထဲကအတိုင်း Premium ဆန်သော Futuristic Dark Theme Palette
-val ZyntraPrimary = Color(0xFF2979FF)       // Glowing Cyan Blue
-val ZyntraBackground = Color(0xFF070913)    // Deep Premium Dark Navy
-val ZyntraSurface = Color(0xFF0F1326)       // Input Box Border & Container
-val ZyntraTextGray = Color(0xFF8F94A8)      // Subtitles Text Color
+// Zyntra Color Palette
+val ZyntraPrimary = Color(0xFF2979FF)       
+val ZyntraBackground = Color(0xFF070913)    
+val ZyntraSurface = Color(0xFF0F1326)       
+val ZyntraTextGray = Color(0xFF8F94A8)      
 
 // ======= [1. BACKEND LOGIC: API NETWORKING] =======
 
@@ -63,7 +65,7 @@ interface OpenAiService {
 object RetrofitClient {
     val instance: OpenAiService by lazy {
         Retrofit.Builder()
-            .baseUrl("https://api.openai.com/")
+            .baseUrl("https://openai.com")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(OpenAiService::class.java)
@@ -154,7 +156,8 @@ fun ZyntraMainScreen(viewModel: ChatViewModel) {
                             modifier = Modifier
                                 .size(36.dp)
                                 .clip(CircleShape)
-                                .background(Color.White.copy(alpha = 0.08s)),
+                                // 🛠️ Error ဖြစ်စေသော 0.08s နေရာတွင် သန့်စင်သော 0.08f သို့ ပြောင်းလဲထားသည်
+                                .background(Color.White.copy(alpha = 0.08f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -177,7 +180,6 @@ fun ZyntraMainScreen(viewModel: ChatViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             
-            // ၁။ အပေါ်ဘက် စကားပြောစာတန်း (Status text)
             Text(
                 text = "Go ahead, I'm listening...",
                 color = ZyntraTextGray,
@@ -187,7 +189,6 @@ fun ZyntraMainScreen(viewModel: ChatViewModel) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // ၂။ AI စဉ်းစားနေချိန်တွင် Message List ပြသရန် (တက်လာသော စာသားများအား စောင့်ကြည့်ရန်)
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -196,7 +197,6 @@ fun ZyntraMainScreen(viewModel: ChatViewModel) {
                 contentAlignment = Alignment.Center
             ) {
                 if (viewModel.messages.isEmpty() && !viewModel.isLoading) {
-                    // စကားမပြောသေးခင် အလယ်တွင် ပြသမည့် Glowing Light (ပုံထဲကအတိုင်း)
                     VoiceGlowingCircle()
                 } else {
                     LazyColumn(
@@ -232,7 +232,6 @@ fun ZyntraMainScreen(viewModel: ChatViewModel) {
                 }
             }
 
-            // ၃။ ပုံထဲကအတိုင်း Suggestion Box (ဥပမာ စာသားပြသသည့်နေရာ)
             if (viewModel.messages.isEmpty()) {
                 Text(
                     text = "Tell me the simple timeline of human\nhistory based on the book Sapiens.",
@@ -244,9 +243,14 @@ fun ZyntraMainScreen(viewModel: ChatViewModel) {
                 )
             }
 
-            // ၄။ အောက်ခြေ Control Area (စာရိုက်ဘား နှင့် အသံဖမ်းခလုတ်များ တွဲဖက်တည်ဆောက်မှု)
             Surface(
                 color = Color.Transparent,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Row(
