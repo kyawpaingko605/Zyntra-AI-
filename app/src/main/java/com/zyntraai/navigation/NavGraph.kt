@@ -7,7 +7,7 @@ import com.zyntraai.ui.chat.ChatScreen
 import com.zyntraai.ui.home.HomeScreen
 import com.zyntraai.ui.onboarding.OnboardingScreen
 import com.zyntraai.ui.splash.SplashScreen
-
+import com.zyntraai.ui.profile.ProfileScreen
 @Composable
 fun NavGraph() {
 
