@@ -2,37 +2,53 @@ name: Zyntra AI CI Build
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "master" ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: gradle
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
 
-      - name: Inject API Key into local.properties
-        run: |
-          echo "OPENAI_API_KEY=${{ secrets.GEMINI_API_KEY }}" > local.properties
+    # 💡 [ဒီအဆင့်က Manifest အမှားအားလုံးကို အမြစ်ပြတ် ရှင်းပေးမှာပါ]
+    - name: Rewrite Clean AndroidManifest.xml Directly
+      run: |
+        mkdir -p app/src/main
+        printf '<?xml version="1.0" encoding="utf-8"?>\n' > app/src/main/AndroidManifest.xml
+        printf '<manifest xmlns:android="http://android.com">\n' >> app/src/main/AndroidManifest.xml
+        printf '    <uses-permission android:name="android.permission.INTERNET" />\n' >> app/src/main/AndroidManifest.xml
+        printf '    <application android:allowBackup="true" android:label="@string/app_name" android:supportsRtl="true" android:theme="@style/Theme.Material3.DayNight.NoActionBar">\n' >> app/src/main/AndroidManifest.xml
+        printf '        <activity android:name="com.zyntraai.MainActivity" android:exported="true">\n' >> app/src/main/AndroidManifest.xml
+        printf '            <intent-filter>\n' >> app/src/main/AndroidManifest.xml
+        printf '                <action android:name="android.intent.action.MAIN" />\n' >> app/src/main/AndroidManifest.xml
+        printf '                <category android:name="android.intent.category.LAUNCHER" />\n' >> app/src/main/AndroidManifest.xml
+        printf '            </intent-filter>\n' >> app/src/main/AndroidManifest.xml
+        printf '        </activity>\n' >> app/src/main/AndroidManifest.xml
+        printf '    </application>\n' >> app/src/main/AndroidManifest.xml
+        printf '</manifest>\n' >> app/src/main/AndroidManifest.xml
 
-      - name: Grant Execute Permission for Gradlew
-        run: chmod +x gradlew
+    - name: Inject API Key into local.properties
+      run: |
+        echo "OPENAI_API_KEY=\"${{ secrets.OPENAI_API_KEY }}\"" > local.properties
 
-      - name: Build with Gradle (Assemble Debug APK)
-        run: ./gradlew assembleDebug
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
 
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Zyntra-AI-Debug-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+    - name: Build with Gradle (Assemble Debug APK)
+      run: ./gradlew assembleDebug
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Zyntra-AI-Debug-APK
+        path: app/build/outputs/apk/debug/app-debug.apk
