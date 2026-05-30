@@ -3,8 +3,9 @@ package com.zyntraai
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,16 +13,20 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Star 
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.VolumeMute
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
@@ -34,11 +39,11 @@ import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.POST
 
-// Zyntra Color Palette
-val ZyntraPrimary = Color(0xFF7C4DFF) 
-val ZyntraBackground = Color(0xFF14121F)
-val ZyntraSurface = Color(0xFF211D36)
-val ZyntraBubbleAI = Color(0xFF2A244D)
+// ပုံထဲကအတိုင်း Premium ဆန်သော Futuristic Dark Theme Palette
+val ZyntraPrimary = Color(0xFF2979FF)       // Glowing Cyan Blue
+val ZyntraBackground = Color(0xFF070913)    // Deep Premium Dark Navy
+val ZyntraSurface = Color(0xFF0F1326)       // Input Box Border & Container
+val ZyntraTextGray = Color(0xFF8F94A8)      // Subtitles Text Color
 
 // ======= [1. BACKEND LOGIC: API NETWORKING] =======
 
@@ -58,7 +63,7 @@ interface OpenAiService {
 object RetrofitClient {
     val instance: OpenAiService by lazy {
         Retrofit.Builder()
-            .baseUrl("https://api.openai.com/") // 👈 Base URL လမ်းကြောင်းမှန်အောင် ပြင်ဆင်ထားသည်
+            .baseUrl("https://api.openai.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(OpenAiService::class.java)
@@ -136,13 +141,31 @@ fun ZyntraMainScreen(viewModel: ChatViewModel) {
         topBar = {
             TopAppBar(
                 title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Star, "AI", tint = ZyntraPrimary, modifier = Modifier.size(24.dp))
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text("Zyntra AI", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "Speaking To AI Bot", 
+                        color = Color.White, 
+                        fontSize = 18.sp, 
+                        fontWeight = FontWeight.SemiBold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = { /* Back handle */ }) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.08s)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack, 
+                                contentDescription = "Back", 
+                                tint = Color.White
+                            )
+                        }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = ZyntraSurface)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = ZyntraBackground)
             )
         }
     ) { paddingValues ->
@@ -150,98 +173,80 @@ fun ZyntraMainScreen(viewModel: ChatViewModel) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(ZyntraBackground)
+                .background(ZyntraBackground),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 8.dp)
-            ) {
-                items(viewModel.messages, key = { it.id }) { message ->
-                    ChatRowItem(message = message)
-                }
-                if (viewModel.isLoading) {
-                    item {
-                        Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(color = ZyntraPrimary)
-                        }
-                    }
-                }
-            }
+            
+            // ၁။ အပေါ်ဘက် စကားပြောစာတန်း (Status text)
+            Text(
+                text = "Go ahead, I'm listening...",
+                color = ZyntraTextGray,
+                fontSize = 15.sp,
+                modifier = Modifier.padding(top = 28.dp)
+            )
 
-            ChatInputRow(
-                text = inputMessage,
-                onTextChange = { inputMessage = it },
-                onSendClick = {
-                    if (inputMessage.isNotBlank()) {
-                        val currentInput = inputMessage
-                        inputMessage = ""
-                        viewModel.sendMessage(currentInput) {
-                            coroutineScope.launch {
-                                if (viewModel.messages.isNotEmpty()) {
-                                    listState.animateScrollToItem(viewModel.messages.size - 1)
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ၂။ AI စဉ်းစားနေချိန်တွင် Message List ပြသရန် (တက်လာသော စာသားများအား စောင့်ကြည့်ရန်)
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                if (viewModel.messages.isEmpty() && !viewModel.isLoading) {
+                    // စကားမပြောသေးခင် အလယ်တွင် ပြသမည့် Glowing Light (ပုံထဲကအတိုင်း)
+                    VoiceGlowingCircle()
+                } else {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        items(viewModel.messages, key = { it.id }) { message ->
+                            Text(
+                                text = message.text,
+                                color = if (message.isUser) ZyntraPrimary else Color.White,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Medium,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 12.dp)
+                            )
+                        }
+                        if (viewModel.isLoading) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp), 
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(color = ZyntraPrimary, strokeWidth = 2.dp)
                                 }
                             }
                         }
                     }
                 }
-            )
-        }
-    }
-}
-
-@Composable
-fun ChatRowItem(message: ChatMessage) {
-    val rowBgColor = if (message.isUser) ZyntraBackground else ZyntraBubbleAI
-    Row(
-        modifier = Modifier.fillMaxWidth().background(rowBgColor).padding(vertical = 16.dp, horizontal = 12.dp),
-        verticalAlignment = Alignment.Top
-    ) {
-        if (message.isUser) {
-            Icon(Icons.Default.AccountCircle, "User", tint = Color.LightGray, modifier = Modifier.size(32.dp))
-        } else {
-            Box(modifier = Modifier.size(32.dp).clip(RoundedCornerShape(4.dp)).background(ZyntraPrimary), contentAlignment = Alignment.Center) {
-                Icon(Icons.Default.Star, "AI", tint = Color.White, modifier = Modifier.size(20.dp))
             }
-        }
-        Spacer(modifier = Modifier.width(16.dp))
-        Box(modifier = Modifier.weight(1f).animateContentSize()) {
-            // 🛠️ ပြဿနာရှာနေသော MarkdownText အစား Standard Compose Text ကို ပြောင်းသုံးထားသည်
-            Text(
-                text = message.text, 
-                color = Color(0xFFECECF1), 
-                fontSize = 16.sp, 
+
+            // ၃။ ပုံထဲကအတိုင်း Suggestion Box (ဥပမာ စာသားပြသသည့်နေရာ)
+            if (viewModel.messages.isEmpty()) {
+                Text(
+                    text = "Tell me the simple timeline of human\nhistory based on the book Sapiens.",
+                    color = ZyntraTextGray.copy(alpha = 0.7f),
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 20.sp,
+                    modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp)
+                )
+            }
+
+            // ၄။ အောက်ခြေ Control Area (စာရိုက်ဘား နှင့် အသံဖမ်းခလုတ်များ တွဲဖက်တည်ဆောက်မှု)
+            Surface(
+                color = Color.Transparent,
                 modifier = Modifier.fillMaxWidth()
-            )
-        }
-    }
-}
-
-@Composable
-fun ChatInputRow(text: String, onTextChange: (String) -> Unit, onSendClick: () -> Unit) {
-    Surface(color = ZyntraSurface) {
-        Row(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextField(
-                value = text,
-                onValueChange = onTextChange,
-                placeholder = { Text("Message Zyntra...", color = Color.Gray) },
-                modifier = Modifier.weight(1f).clip(RoundedCornerShape(24.dp)),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFF2E294E),
-                    unfocusedContainerColor = Color(0xFF2E294E),
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                maxLines = 4
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            IconButton(
-                onClick = onSendClick,
-                modifier = Modifier.clip(CircleShape).background(if (text.isNotBlank()) ZyntraPrimary else Color.Transparent)
             ) {
-                Icon(Icons.AutoMirrored.Filled.Send, "Send", tint = if (text.isNotBlank()) Color.White else Color.Gray)
-            }
-        }
-    }
-}
+                Column(
