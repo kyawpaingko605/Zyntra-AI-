@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- App ရဲ့ အခြေခံ Theme ကို Material 3 Dark UI အဖြစ် သတ်မှတ်ခြင်း -->
-    <style name="Theme.Material3.Dark.NoActionBar" parent="Theme.Material3.Dark.NoActionBar">
-        <!-- Status Bar (ဖုန်းရဲ့ အပေါ်ဆုံး ဘက်ထရီပြတဲ့နေရာ) ကို အမည်းရောင်ပြောင်းရန် -->
+    <!-- App ရဲ့ Status Bar အရောင်နှင့် Dark UI ဒီဇိုင်းပုံစံကို သတ်မှတ်ခြင်း -->
+    <style name="Theme.Material3.DayNight.NoActionBar" parent="Theme.Material3.Dark.NoActionBar">
         <item name="android:statusBarColor">#211D36</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
