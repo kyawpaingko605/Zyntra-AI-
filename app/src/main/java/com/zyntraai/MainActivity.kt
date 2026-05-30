@@ -1,4 +1,4 @@
-package com.zyntraai // 👈 သင့်ရဲ့ Package Name အမှန်အတိုင်း ထားရှိပါ
+package com.zyntraai // 👈 Package နာမည်ကို com.zyntraai သို့ လဲလှယ်ထားပါသည်
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -14,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AccountCircle
-// 🛠️ Icons Extended စာကြည့်တိုက်အစား အခြေခံ Icon ကို သုံးရန် ပြင်ဆင်ထားသည်
 import androidx.compose.material.icons.filled.Star 
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -27,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-// 🛠️ Markdown သီးသန့် Import တန်းကို တိကျအောင် ဖြည့်စွက်ထားသည်
 import dev.jeziellago.compose.markdown.MarkdownText 
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -121,7 +119,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                val myViewModel: ChatViewModel = viewModel() // 🛠️ Function invocation error ကို ဖြေရှင်းထားသည်
+                val myViewModel: ChatViewModel = viewModel()
                 ZyntraMainScreen(myViewModel)
             }
         }
