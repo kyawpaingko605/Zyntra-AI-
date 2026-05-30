@@ -6,13 +6,11 @@ plugins {
 }
 
 android {
-    // 🛠️ MainActivity အသစ်နှင့် ကိုက်ညီအောင် Package Namespace ကို ပြောင်းလဲထားသည်
-    namespace = "com.zyntraai" 
+    namespace = "com.zyntraai" // 👈 MainActivity နှင့် ကိုက်ညီအောင် ပြောင်းလဲထားသည်
     compileSdk = 34
 
     defaultConfig {
-        // 🛠️ App ရဲ့ Application ID ကိုပါ com.zyntraai သို့ လိုက်လံညှိနှိုင်းပေးထားသည်
-        applicationId = "com.zyntraai" 
+        applicationId = "com.zyntraai" // 👈 Application ID ကို com.zyntraai ဟု သတ်မှတ်သည်
         minSdk = 26
         targetSdk = 34
         versionCode = 1
@@ -55,7 +53,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
     
-    // 🛠️ [ဖြည့်စွက်ချက်] MainActivity ထဲက viewModel() စနစ် အလုပ်လုပ်နိုင်ရန် ဤ Library မဖြစ်မနေ လိုအပ်ပါသည်
+    // 🛠️ MainActivity ထဲက viewModel() အလုပ်လုပ်နိုင်ရန် ဤစာကြောင်း ဖြည့်ထားသည်
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     
     implementation(platform("androidx.compose:compose-bom:2024.02.00"))
@@ -67,6 +65,6 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
-    // 🛠️ [ဖြည့်စွက်ချက်] စာလုံးပေါင်းမှန်ကန်ပြီးသား တရားဝင် Markdown စာကြည့်တိုက် ဖြစ်ပါသည်
+    // 🛠️ Markdown ပြသနိုင်မည့် library အမှန် ဖြစ်ပါသည်
     implementation("com.github.jeziellago:compose-markdown:0.3.1")
 }
