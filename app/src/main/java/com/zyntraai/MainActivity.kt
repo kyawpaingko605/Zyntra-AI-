@@ -1,4 +1,4 @@
-package com.ai.zyntraai // 👈 သင့်ရဲ့ Package Name အမှန်အတိုင်း ထားရှိပါ
+package com.zyntraai // 👈 သင့်ရဲ့ Package Name အမှန်အတိုင်း ထားရှိပါ
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
