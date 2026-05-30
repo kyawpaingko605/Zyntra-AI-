@@ -23,7 +23,8 @@ android {
         }
         val apiKey = localProperties.getProperty("OPENAI_API_KEY") ?: ""
         
-        buildConfigField("String", "OPENAI_API_KEY", "\"$apiKey\"")
+        // 🛠️ Java အမှားမတက်အောင် Quotes အပိုများကို ဖယ်ရှားပြီး စနစ်တကျ ပြန်ပြင်ထားသည်
+        buildConfigField("String", "OPENAI_API_KEY", apiKey)
     }
 
     buildTypes {
@@ -62,6 +63,4 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-
-    // 🛠️ ပြဿနာရှာနေသော Markdown Library ကို လုံးဝ (လုံးဝ) ဖယ်ထုတ်ပေးလိုက်သည်
 }
