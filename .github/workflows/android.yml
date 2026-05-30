@@ -20,26 +20,25 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    # 💡 [ဒီအဆင့်က Error ကို အပိုင်ရှင်းပေးမှာပါ] စက်ရုပ်ကိုယ်တိုင် အမှားကင်းစင်သော AndroidManifest.xml ဖိုင်ကို ရေးသားခြင်း
-    - name: Force Generate Clean AndroidManifest.xml
+    # 💡 [ဒီအဆင့်က Error တွေကို အပိုင်ရှင်းပေးမှာပါ] 
+    # Linux command ဖြင့် formatting အမှားမရှိစေဘဲ တိုက်ရိုက် သန့်စင်သော AndroidManifest.xml ရေးသားခိုင်းခြင်း
+    - name: Generate Solid AndroidManifest.xml
       run: |
         mkdir -p app/src/main
-        cat << 'EOF' > app/src/main/AndroidManifest.xml
-        <?xml version="1.0" encoding="utf-8"?>
-        <manifest xmlns:android="http://android.com">
-            <uses-permission android:name="android.permission.INTERNET" />
-            <application android:allowBackup="true" android:label="Zyntra AI" android:supportsRtl="true">
-                <activity android:name="com.ai.zyntraai.MainActivity" android:exported="true" android:theme="@style/Theme.Material3.Dark.NoActionBar">
-                    <intent-filter>
-                        <action android:name="android.intent.action.MAIN" />
-                        <category android:name="android.intent.category.LAUNCHER" />
-                    </intent-filter>
-                </activity>
-            </application>
-        </manifest>
-        EOF
+        echo '<?xml version="1.0" encoding="utf-8"?>' > app/src/main/AndroidManifest.xml
+        echo '<manifest xmlns:android="http://schemas.android.com/apk/res/android">' >> app/src/main/AndroidManifest.xml
+        echo '    <uses-permission android:name="android.permission.INTERNET" />' >> app/src/main/AndroidManifest.xml
+        echo '    <application android:allowBackup="true" android:label="Zyntra AI" android:supportsRtl="true">' >> app/src/main/AndroidManifest.xml
+        echo '        <activity android:name="com.ai.zyntraai.MainActivity" android:exported="true" android:theme="@style/Theme.Material3.Dark.NoActionBar">' >> app/src/main/AndroidManifest.xml
+        echo '            <intent-filter>' >> app/src/main/AndroidManifest.xml
+        echo '                <action android:name="android.intent.action.MAIN" />' >> app/src/main/AndroidManifest.xml
+        echo '                <category android:name="android.intent.category.LAUNCHER" />' >> app/src/main/AndroidManifest.xml
+        echo '            </intent-filter>' >> app/src/main/AndroidManifest.xml
+        echo '        </activity>' >> app/src/main/AndroidManifest.xml
+        echo '    </application>' >> app/src/main/AndroidManifest.xml
+        echo '</manifest>' >> app/src/main/AndroidManifest.xml
 
-    # GitHub Secrets ထဲက OPENAI_API_KEY ကို local.properties ထဲသို့ ထည့်ပေးခြင်း
+    # GitHub Secrets ထဲက OPENAI_API_KEY ကို local.properties ထဲသို့ လုံုံခြုံစွာ ထည့်သွင်းခြင်း
     - name: Inject API Key into local.properties
       run: |
         echo "OPENAI_API_KEY=\"${{ secrets.OPENAI_API_KEY }}\"" > local.properties
