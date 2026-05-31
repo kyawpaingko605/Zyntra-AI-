@@ -5,16 +5,18 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Star 
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,11 +36,13 @@ import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.POST
 
-// Zyntra Color Palette
-val ZyntraPrimary = Color(0xFF7C4DFF) 
-val ZyntraBackground = Color(0xFF14121F)
-val ZyntraSurface = Color(0xFF211D36)
-val ZyntraBubbleAI = Color(0xFF2A244D)
+// ပုံထဲကအတိုင်း သန့်စင်တောက်ပသော ကာလာ Palette
+val ChatGPTBlue = Color(0xFF0D6EFD)       // စာပို့ bubble အပြာရောင်
+val ChatGPTLightBg = Color(0xFFFFFFFF)    // နောက်ခံအဖြူရောင်
+val ChatGPTTextDark = Color(0xFF111111)   // စာသားအမည်းရောင်
+val ChatGPTHintGray = Color(0xFF6E6E80)   // စာသားအမှုံရောင်
+val ChatGPTBubbleAI = Color(0xFFF7F7F8)   // AI ရဲ့ မီးခိုးဖျော့ bubble ရောင်
+val ChatGPTBorder = Color(0xFFE5E5E5)     // စည်းကြောင်းအရောင်
 
 // ======= [1. BACKEND LOGIC: API NETWORKING] =======
 
@@ -58,20 +62,29 @@ interface OpenAiService {
 object RetrofitClient {
     val instance: OpenAiService by lazy {
         Retrofit.Builder()
-            .baseUrl("https://api.openai.com/")
+            .baseUrl("https://openai.com")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(OpenAiService::class.java)
     }
 }
 
-// ======= [2. ARCHITECTURE: STATE & BUSINESS LOGIC] =======
+// ======= [2. ARCHITECTURE: STATE MANAGEMENT] =======
 
 data class ChatMessage(val id: String, val text: String, val isUser: Boolean)
+data class HistoryChat(val title: String, val time: String)
 
 class ChatViewModel : ViewModel() {
     var messages by mutableStateOf(listOf<ChatMessage>())
     var isLoading by mutableStateOf(false)
+
+    // ပုံထဲက နမူနာသမိုင်းကြောင်း Chats စာရင်း
+    val chatHistory = listOf(
+        HistoryChat("Project Spark Ideas", "3 hours ago"),
+        HistoryChat("Vacation Planning", "Yesterday"),
+        HistoryChat("UI Design Feedback", "2 days ago"),
+        HistoryChat("Recipe for Lasagna", "3 days ago")
+    )
 
     private val apiKey = "Bearer ${BuildConfig.OPENAI_API_KEY}" 
 
@@ -86,23 +99,11 @@ class ChatViewModel : ViewModel() {
                 val apiMessages = messages.map { 
                     ApiMessage(role = if (it.isUser) "user" else "assistant", content = it.text) 
                 }
-                
-                val response = RetrofitClient.instance.getChatCompletion(
-                    apiKey = apiKey,
-                    request = OpenAIRequest(messages = apiMessages)
-                )
-                
-                val aiResponseText = response.choices.firstOrNull()?.message?.content 
-                    ?: "Error: အဖြေမရရှိပါ။"
-                
+                val response = RetrofitClient.instance.getChatCompletion(apiKey, OpenAIRequest(messages = apiMessages))
+                val aiResponseText = response.choices.firstOrNull()?.message?.content ?: "အဖြေမရှိပါ။"
                 messages = messages + ChatMessage(id = System.nanoTime().toString(), text = aiResponseText, isUser = false)
-                
             } catch (e: Exception) {
-                messages = messages + ChatMessage(
-                    id = System.nanoTime().toString(), 
-                    text = "Zyntra AI နှင့် ချိတ်ဆက်မှု မအောင်မြင်ပါ: ${e.localizedMessage}", 
-                    isUser = false
-                )
+                messages = messages + ChatMessage(id = System.nanoTime().toString(), text = "ချိတ်ဆက်မှု အဆင်မပြေပါ", isUser = false)
             } finally {
                 isLoading = false
                 onComplete()
@@ -111,7 +112,7 @@ class ChatViewModel : ViewModel() {
     }
 }
 
-// ======= [3. UI DESIGN: PRODUCTION UI LAYER] =======
+// ======= [3. UI DESIGN: MAIN SCREEN LAYER] =======
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -119,7 +120,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 val myViewModel: ChatViewModel = viewModel()
-                ZyntraMainScreen(myViewModel)
+                ChatGPTUiScreen(myViewModel)
             }
         }
     }
@@ -127,22 +128,25 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ZyntraMainScreen(viewModel: ChatViewModel) {
+fun ChatGPTUiScreen(viewModel: ChatViewModel) {
     var inputMessage by remember { mutableStateOf("") }
-    val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Star, "AI", tint = ZyntraPrimary, modifier = Modifier.size(24.dp))
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text("Zyntra AI", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Text("ChatGPT", color = ChatGPTBlue, fontSize = 22.sp, fontWeight = FontWeight.Bold)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = ZyntraSurface)
+                navigationIcon = {
+                    Icon(Icons.Default.Add, "New", tint = ChatGPTBlue, modifier = Modifier.padding(start = 12.dp).size(26.dp))
+                },
+                actions = {
+                    Icon(Icons.Default.Search, "Search", tint = ChatGPTBlue, modifier = Modifier.padding(end = 12.dp).size(26.dp))
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = ChatGPTLightBg)
             )
         }
     ) { paddingValues ->
@@ -150,37 +154,57 @@ fun ZyntraMainScreen(viewModel: ChatViewModel) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(ZyntraBackground)
+                .background(ChatGPTLightBg)
         ) {
             LazyColumn(
-                state = listState,
-                modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 8.dp)
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
             ) {
-                items(viewModel.messages, key = { it.id }) { message ->
-                    ChatRowItem(message = message)
+                // ၁။ Chats ရာဇဝင်ခေါင်းစဉ်အပိုင်း
+                item {
+                    Text(
+                        text = "Chats",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = ChatGPTTextDark,
+                        modifier = Modifier.padding(vertical = 12.dp)
+                    )
                 }
+
+                // ၂။ သမိုင်းကြောင်းဖိုင်စာရင်းများ (နမူနာပြအတိုင်း)
+                items(viewModel.chatHistory) { history ->
+                    HistoryItemRow(history)
+                    HorizontalDivider(color = ChatGPTBorder, thickness = 0.5.dp)
+                }
+
+                item { Spacer(modifier = Modifier.height(24.dp)) }
+
+                // ၃။ တကယ့် API စကားပြောခန်း မက်ဆေ့ခ်ျများပြသခြင်း
+                items(viewModel.messages, key = { it.id }) { message ->
+                    ChatBubbleRow(message)
+                }
+
                 if (viewModel.isLoading) {
                     item {
-                        Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(color = ZyntraPrimary)
+                        Box(modifier = Modifier.fillMaxWidth().padding(8.dp), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(color = ChatGPTBlue, strokeWidth = 2.dp)
                         }
                     }
                 }
             }
 
-            ChatInputRow(
+            // ၄။ အောက်ခြေ အဝိုင်းပုံစံ Input Box Layout
+            BottomInputBar(
                 text = inputMessage,
                 onTextChange = { inputMessage = it },
                 onSendClick = {
                     if (inputMessage.isNotBlank()) {
-                        val currentInput = inputMessage
+                        val currentText = inputMessage
                         inputMessage = ""
-                        viewModel.sendMessage(currentInput) {
-                            coroutineScope.launch {
-                                if (viewModel.messages.isNotEmpty()) {
-                                    listState.animateScrollToItem(viewModel.messages.size - 1)
-                                }
-                            }
+                        viewModel.sendMessage(currentText) {
+                            // စာပို့ပြီးလျှင် auto scroll လုပ်ရန် ဤနေရာ၌ ထိန်းချုပ်နိုင်ပါသည်
                         }
                     }
                 }
@@ -189,58 +213,49 @@ fun ZyntraMainScreen(viewModel: ChatViewModel) {
     }
 }
 
+// ======= [၄။ UI COMPONENT တစ်ခုချင်းစီစာရင်း] =======
+
 @Composable
-fun ChatRowItem(message: ChatMessage) {
-    val rowBgColor = if (message.isUser) ZyntraBackground else ZyntraBubbleAI
+fun HistoryItemRow(history: HistoryChat) {
     Row(
-        modifier = Modifier.fillMaxWidth().background(rowBgColor).padding(vertical = 16.dp, horizontal = 12.dp),
-        verticalAlignment = Alignment.Top
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        if (message.isUser) {
-            Icon(Icons.Default.AccountCircle, "User", tint = Color.LightGray, modifier = Modifier.size(32.dp))
-        } else {
-            Box(modifier = Modifier.size(32.dp).clip(RoundedCornerShape(4.dp)).background(ZyntraPrimary), contentAlignment = Alignment.Center) {
-                Icon(Icons.Default.Star, "AI", tint = Color.White, modifier = Modifier.size(20.dp))
-            }
-        }
-        Spacer(modifier = Modifier.width(16.dp))
-        Box(modifier = Modifier.weight(1f).animateContentSize()) {
-            Text(
-                text = message.text, 
-                color = Color(0xFFECECF1), 
-                fontSize = 16.sp, 
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+        Text(text = history.title, fontSize = 16.sp, color = ChatGPTTextDark, modifier = Modifier.weight(1f))
+        Text(text = history.time, fontSize = 14.sp, color = ChatGPTHintGray)
+        Spacer(modifier = Modifier.width(8.dp))
+        Icon(Icons.Default.Star, "Star", tint = ChatGPTBlue, modifier = Modifier.size(18.dp))
     }
 }
 
 @Composable
-fun ChatInputRow(text: String, onTextChange: (String) -> Unit, onSendClick: () -> Unit) {
-    Surface(color = ZyntraSurface) {
-        Row(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextField(
-                value = text,
-                onValueChange = onTextChange,
-                placeholder = { Text("Message Zyntra...", color = Color.Gray) },
-                modifier = Modifier.weight(1f).clip(RoundedCornerShape(24.dp)),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFF2E294E),
-                    unfocusedContainerColor = Color(0xFF2E294E),
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                maxLines = 4
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            IconButton(
-                onClick = onSendClick,
-                modifier = Modifier.clip(CircleShape).background(if (text.isNotBlank()) ZyntraPrimary else Color.Transparent)
-            ) {
-                Icon(Icons.AutoMirrored.Filled.Send, "Send", tint = if (text.isNotBlank()) Color.White else Color.Gray)
+fun ChatBubbleRow(message: ChatMessage) {
+    val isUser = message.isUser
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        contentAlignment = if (isUser) Alignment.CenterEnd else Alignment.CenterStart
+    ) {
+        Row(
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start,
+            modifier = Modifier.fillMaxWidth(0.85f)
+        ) {
+            if (!isUser) {
+                // AI ရဲ့ စက်ဝိုင်းအဝိုင်း Icon လေး
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(ChatGPTBlue),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("AI", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                }
+                Spacer(modifier = Modifier.width(8.dp))
             }
-        }
-    }
-}
+
+            Column {
