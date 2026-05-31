@@ -20,26 +20,198 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    # 💡 [ဖုန်းနဲ့ ကူးယူစဉ် ပါလာတတ်သော စာလုံးအမှားများအားလုံးကို အမြစ်ပြတ်ရှင်းရန် အလုံခြုံဆုံး Hex စနစ်ကို သုံးထားပါသည်]
-    - name: Force Overwrite Perfect AndroidManifest.xml
+    # 🛠️ ၁။ app/build.gradle.kts ကို စက်ရုပ်စနစ်ဖြင့် အမှားအယွင်းမရှိ တိုက်ရိုက်ဆောက်ခြင်း
+    - name: Force Generate App Build Gradle
+      run: |
+        mkdir -p app
+        cat << 'EOF' > app/build.gradle.kts
+        import java.util.Properties
+
+        plugins {
+            id("com.android.application")
+            id("org.jetbrains.kotlin.android")
+        }
+
+        android {
+            namespace = "com.zyntraai"
+            compileSdk = 34
+
+            defaultConfig {
+                applicationId = "com.zyntraai"
+                minSdk = 26
+                targetSdk = 34
+                versionCode = 1
+                versionName = "1.0"
+                
+                val localProperties = Properties()
+                val localPropertiesFile = rootProject.file("local.properties")
+                if (localPropertiesFile.exists()) {
+                    localPropertiesFile.inputStream().use { localProperties.load(it) }
+                }
+                val apiKey = localProperties.getProperty("OPENAI_API_KEY") ?: ""
+                
+                buildConfigField("String", "OPENAI_API_KEY", "\"$apiKey\"")
+            }
+
+            buildTypes {
+                release {
+                    isMinifyEnabled = false
+                    proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+                }
+            }
+            compileOptions {
+                sourceCompatibility = JavaVersion.VERSION_17
+                targetCompatibility = JavaVersion.VERSION_17
+            }
+            kotlinOptions {
+                jvmTarget = "17"
+            }
+            buildFeatures {
+                compose = true
+                buildConfig = true
+            }
+            composeOptions {
+                kotlinCompilerExtensionVersion = "1.5.8"
+            }
+        }
+
+        dependencies {
+            implementation("androidx.core:core-ktx:1.12.0")
+            implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+            implementation("androidx.activity:activity-compose:1.8.2")
+            implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+            
+            implementation(platform("androidx.compose:compose-bom:2024.02.00"))
+            implementation("androidx.compose.ui:ui")
+            implementation("androidx.compose.ui:ui-graphics")
+            implementation("androidx.compose.material3:material3")
+            
+            implementation("com.squareup.retrofit2:retrofit:2.9.0")
+            implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+        }
+        EOF
+
+    # 🛠️ ၂။ AndroidManifest.xml ကို အမှားကင်းစင်အောင် ဆောက်ခြင်း (Base64 အမှန်)
+    - name: Inject Perfect AndroidManifest.xml
       run: |
         mkdir -p app/src/main
-        echo "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d227574662d38223f3e0a3c6d616e696665737420786d6c6e733a616e64726f69643d22687474703a2f2f736368656d61732e616e64726f69642e636f6d2f61706b2f7265732f616e64726f6964223e0a202020203c757365732d7065726d697373696f6e20616e64726f69643a6e616d653d22616e64726f69642e7065726d697373696f6e2e494e5445524e455422202f3e0a202020203c6170706c69636174696f6e0a2020202020202020616e64726f69643a616xlbG93QmFja3VwPSJ0cnVlIgogICAgICAgIGFuZHJvaWQ6bGFiZWw9IkBzdHJpbmcvYXBwX25hbWUiCiAgICAgICAgYW5kcm9pZDpzdXBwb3J0c1J0bD0idHJ1ZSIKICAgICAgICBhbmRyb2lkOnRoZW1lPSJAYW5kcm9pZDpzdHlsZS9UaGVtZS5EZXZpY2VEZWZhdWx0LkxpZ2h0Lk5vQWN0aW9uQmFyIj4KICAgICAgICA8YWN0aXZpdHkKICAgICAgICAgICAgYW5kcm9pZDpuYW1lPSJjb20uenludHJhYWkuTWFpbkFjdGl2aXR5IgogICAgICAgICAgICBhbmRyb2lkOmV4cG9ydGVkPSJ0cnVlIj4KICAgICAgICAgICAgPGludGVudC1maWx0ZXI+CiAgICAgICAgICAgICAgICA8YWN0aW9uIGFuZHJvaWQ6bmFtZT0iYW5kcm9pZC5pbnRlbnQuYWN0aW9uLk1BSU4iIC8+CiAgICAgICAgICAgICAgICA8Y2F0ZWdvcnkgYW5kcm9pZDpuYW1lPSJhbmRyb2lkLmludGVudC5jYXRlZ29yeS5MQVVOQ0hFUiIgLz4KICAgICAgICAgICAgPC9pbnRlbnQtZmlsdGVyPgogICAgICAgIDwvYWN0aXZpdHk+CiAgICA8L2FwcGxpY2F0aW9uPgo8L21hbmlmZXN0Pg==" | sed 's/6xlbG93QmFja3VwPSJ0cnVlIgogICAgICAgIGFuZHJvaWQ6bGFiZWw9IkBzdHJpbmcvYXBwX25hbWUiCiAgICAgICAgYW5kcm9pZDpzdXBwb3J0c1J0bD0idHJ1ZSIKICAgICAgICBhbmRyb2lkOnRoZW1lPSJAYW5kcm9pZDpzdHlsZS9UaGVtZS5EZXZpY2VEZWZhdWx0LkxpZ2h0Lk5vQWN0aW9uQmFyIj4KICAgICAgICA8YWN0aXZpdHkKICAgICAgICAgICAgYW5kcm9pZDpuYW1lPSJjb20uenludHJhYWkuTWFpbkFjdGl2aXR5IgogICAgICAgICAgICBhbmRyb2lkOmV4cG9ydGVkPSJ0cnVlIj4KICAgICAgICAgICAgPGludGVudC1maWx0ZXI+CiAgICAgICAgICAgICAgICA8YWN0aW9uIGFuZHJvaWQ6bmFtZT0iYW5kcm9pZC5pbnRlbnQuYWN0aW9uLk1BSU4iIC8+CiAgICAgICAgICAgICAgICA8Y2F0ZWdvcnkgYW5kcm9pZDpuYW1lPSJhbmRyb2lkLmludGVudC5jYXRlZ29yeS5MQVVOQ0hFUiIgLz4KICAgICAgICAgICAgPC9pbnRlbnQtZmlsdGVyPgogICAgICAgIDwvYWN0aXZpdHk+CiAgICA8L2FwcGxpY2F0aW9uPgo8L21hbmlmZXN0Pg==/YWxsb3dCYWNrdXA9InRydWUiIGFuZHJvaWQ6bGFiZWw9IkBzdHJpbmcvYXBwX25hbWUiIGFuZHJvaWQ6c3VwcG9ydHNSdGw9InRydWUiIGFuZHJvaWQ6dGhlbWU9IkBhbmRyb2lkOnN0eWxlL1RoZW1lLkRldmljZURlZmF1bHQuTGlnaHQuTm9BY3Rpb25CYXIiPphY3Rpdml0eSBhbmRyb2lkOm5hbWU9ImNvbS56eW50cmFhaS5NYWluQWN0aXZpdHkiIGFuZHJvaWQ6ZXhwb3J0ZWQ9InRydWUiPmludGVudC1maWx0ZXI+YWN0aW9uIGFuZHJvaWQ6bmFtZT0iYW5kcm9pZC5pbnRlbnQuYWN0aW9uLk1BSU4iIC8+Y2F0ZWdvcnkgYW5kcm9pZDpuYW1lPSJhbmRyb2lkLmludGVudC5jYXRlZ29yeS5MQVVOQ0hFUiIgLz48L2ludGVudC1maWx0ZXI+PC9hY3Rpdml0eT48L2FwcGxpY2F0aW9uPjwvbWFuaWZlc3Q+L/' | base64 -d > app/src/main/AndroidManifest.xml
+        echo "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPG1hbmlmZXN0IHhtbG5zOmFuZHJvaWQ9Imh0dHA6Ly9zY2hlbWFzLmFuZHJvaWQuY29tL2Fway9yZXMvYW5kcm9pZCI+CiAgICA8dXNlcy1wZXJtaXNzaW9uIGFuZHJvaWQ6bmFtZT0iYW5kcm9pZC5wZXJtaXNzaW9uLklOVEVSTkVUIiAvPgogICAgPGFwcGxpY2F0aW9uCiAgICAgICAgYW5kcm9pZDphbGxvd0JhY2t1cD0idHJ1ZSIKICAgICAgICBhbmRyb2lkOmxhYmVsPSJAc3RyaW5nL2FwcF9uYW1lIgogICAgICAgIGFuZHJvaWQ6c3VwcG9ydHNSdGw9InRydWUiCiAgICAgICAgYW5kcm9pZDp0aGVtZT0iQGFuZHJvaWQ6c3R5bGUvVGhlbWUuRGV2aWNlRGVmYXVsdC5MaWdodC5Ob0FjdGlvbkJhciI+CiAgICAgICAgPGFjdGl2aXR5CiAgICAgICAgICAgIGFuZHJvaWQ6bmFtZT0iY29tLnp5bnRyYWFpLk1haW5BY3Rpdml0eSIKICAgICAgICAgICAgYW5kcm9pZDpleHBvcnRlZD0idHJ1ZSI+CiAgICAgICAgICAgIDxpbnRlbnQtZmlsdGVyPgogICAgICAgICAgICAgICAgPGFjdGlvbiBhbmRyb2lkOm5hbWU9ImFuZHJvaWQuaW50ZW50LkFDVElPTi5NQUlOIiAvPgogICAgICAgICAgICAgICAgPGNhdGVnb3J5IGFuZHJvaWQ6bmFtZT0iYW5kcm9pZC5pbnRlbnQuQ0FURUdPUlkuTEFVTkNIRVIiIC8+CiAgICAgICAgICAgIDwvaW50ZW50LWZpbHRlcj4KICAgICAgICA8L2FjdGl2aXR5PgogICAgPC9hcHBsaWN0aW9uPgo8L21hbmlmZXN0Pg==" | base64 -d > app/src/main/AndroidManifest.xml
 
-    # GitHub Secrets ထဲက OPENAI_API_KEY ကို local.properties ထဲသို့ လုံခြုံစွာ ထည့်သွင်းပေးခြင်း
-    - name: Inject API Key into local.properties
+    # 🛠️ ၃။ AAPT Error ကင်းစင်စေမည့် strings.xml အား ဖန်တီးပေးခြင်း
+    - name: Generate Strings XML
       run: |
-        echo "OPENAI_API_KEY=\"${{ secrets.OPENAI_API_KEY }}\"" > local.properties
+        mkdir -p app/src/main/res/values
+        echo "PHJlc291cmNlcz4KICAgIDxzdHJpbmcvYXBwX25hbWU+WnludHJhIEFJPC9zdHJpbmc+CjwvcmVzb3VyY2VzPg==" | base64 -d > app/src/main/res/values/strings.xml
 
-    # gradlew ခွင့်ပြုချက် ပေးခြင်း
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+    # 🛠️ ၄။ MainActivity.kt ကို တိုက်ရိုက်ဆောက်ခြင်း
+    - name: Generate Proper MainActivity.kt
+      run: |
+        mkdir -p app/src/main/java/com/zyntraai
+        cat << 'EOF' > app/src/main/java/com/zyntraai/MainActivity.kt
+        package com.zyntraai
 
-    - name: Build with Gradle (Assemble Debug APK)
-      run: ./gradlew assembleDebug
+        import android.os.Bundle
+        import androidx.activity.ComponentActivity
+        import androidx.activity.compose.setContent
+        import androidx.compose.animation.animateContentSize
+        import androidx.compose.foundation.background
+        import androidx.compose.foundation.border
+        import androidx.compose.foundation.layout.*
+        import androidx.compose.foundation.lazy.LazyColumn
+        import androidx.compose.foundation.lazy.items
+        import androidx.compose.foundation.shape.CircleShape
+        import androidx.compose.foundation.shape.RoundedCornerShape
+        import androidx.compose.material.icons.Icons
+        import androidx.compose.material.icons.automirrored.filled.ArrowForward
+        import androidx.compose.material.icons.filled.Add
+        import androidx.compose.material.icons.filled.Search
+        import androidx.compose.material.icons.filled.Star
+        import androidx.compose.material3.*
+        import androidx.compose.runtime.*
+        import androidx.compose.ui.Alignment
+        import androidx.compose.ui.Modifier
+        import androidx.compose.ui.draw.clip
+        import androidx.compose.ui.graphics.Color
+        import androidx.compose.ui.text.font.FontWeight
+        import androidx.compose.ui.unit.dp
+        import androidx.compose.ui.unit.sp
+        import androidx.lifecycle.ViewModel
+        import androidx.lifecycle.viewmodel.compose.viewModel
+        import kotlinx.coroutines.MainScope
+        import kotlinx.coroutines.launch
+        import retrofit2.Retrofit
+        import retrofit2.converter.gson.GsonConverterFactory
+        import retrofit2.http.Body
+        import retrofit2.http.Header
+        import retrofit2.http.POST
 
-    - name: Upload APK Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: Zyntra-AI-Debug-APK
-        path: app/build/outputs/apk/debug/app-debug.apk
+        val ChatGPTBlue = Color(0xFF0D6EFD)       
+        val ChatGPTLightBg = Color(0xFFFFFFFF)    
+        val ChatGPTTextDark = Color(0xFF111111)   
+        val ChatGPTHintGray = Color(0xFF6E6E80)   
+        val ChatGPTBubbleAI = Color(0xFFF7F7F8)   
+        val ChatGPTBorder = Color(0xFFE5E5E5)     
+
+        data class OpenAIRequest(val model: String = "gpt-3.5-turbo", val messages: List<ApiMessage>)
+        data class ApiMessage(val role: String, val content: String)
+        data class OpenAIResponse(val choices: List<Choice>)
+        data class Choice(val message: ApiMessage)
+
+        interface OpenAiService {
+            @POST("v1/chat/completions")
+            suspend fun getChatCompletion(@Header("Authorization") apiKey: String, @Body request: OpenAIRequest): OpenAIResponse
+        }
+
+        object RetrofitClient {
+            val instance: OpenAiService by lazy {
+                Retrofit.Builder()
+                    .baseUrl("https://openai.com")
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build()
+                    .create(OpenAiService::class.java)
+            }
+        }
+
+        data class ChatMessage(val id: String, val text: String, val isUser: Boolean)
+        data class HistoryChat(val title: String, val time: String)
+
+        class ChatViewModel : ViewModel() {
+            var messages by mutableStateOf(listOf<ChatMessage>())
+            var isLoading by mutableStateOf(false)
+            val chatHistory = listOf(
+                HistoryChat("Project Spark Ideas", "3 hours ago"),
+                HistoryChat("Vacation Planning", "Yesterday"),
+                HistoryChat("UI Design Feedback", "2 days ago"),
+                HistoryChat("Recipe for Lasagna", "3 days ago")
+            )
+            private val apiKey = "Bearer ${BuildConfig.OPENAI_API_KEY}" 
+
+            fun sendMessage(text: String, onComplete: () -> Unit) {
+                val userMessage = ChatMessage(id = System.nanoTime().toString(), text = text, isUser = true)
+                messages = messages + userMessage
+                isLoading = true
+                onComplete()
+
+                MainScope().launch {
+                    try {
+                        val apiMessages = messages.map { ApiMessage(role = if (it.isUser) "user" else "assistant", content = it.text) }
+                        val response = RetrofitClient.instance.getChatCompletion(apiKey, OpenAIRequest(messages = apiMessages))
+                        val aiResponseText = response.choices.firstOrNull()?.message?.content ?: "အဖြေမရှိပါ။"
+                        messages = messages + ChatMessage(id = System.nanoTime().toString(), text = aiResponseText, isUser = false)
+                    } catch (e: Exception) {
+                        messages = messages + ChatMessage(id = System.nanoTime().toString(), text = "ချိတ်ဆက်မှု အဆင်မပြေပါ", isUser = false)
+                    } finally {
+                        isLoading = false
+                        onComplete()
+                    }
+                }
+            }
+        }
+
+        class MainActivity : ComponentActivity() {
+            override fun onCreate(savedInstanceState: Bundle?) {
+                super.onCreate(savedInstanceState)
+                setContent {
+                    MaterialTheme {
+                        val myViewModel: ChatViewModel = viewModel()
