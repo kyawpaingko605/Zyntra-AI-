@@ -14,13 +14,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.KeyboardVoice
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -35,7 +35,7 @@ import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.POST
 
-// ChatGPT UI Light Theme Palette (မူလအတိုင်း)
+// ChatGPT UI Light Theme Palette
 val ChatGPTBlue = Color(0xFF0D6EFD)       
 val ChatGPTLightBg = Color(0xFFFFFFFF)    
 val ChatGPTTextDark = Color(0xFF111111)   
@@ -61,7 +61,7 @@ interface OpenAiService {
 object RetrofitClient {
     val instance: OpenAiService by lazy {
         Retrofit.Builder()
-            .baseUrl("https://api.openai.com/") // API ချိတ်ဆက်မှု မှန်ကန်စေရန် Base URL ပြင်ဆင်ချက်
+            .baseUrl("https://openai.com")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(OpenAiService::class.java)
@@ -197,7 +197,7 @@ fun ChatGPTUiScreen(viewModel: ChatViewModel) {
                         val currentText = inputMessage
                         inputMessage = ""
                         viewModel.sendMessage(currentText) {
-                            // On complete logic
+                            // On complete
                         }
                     }
                 }
@@ -206,7 +206,7 @@ fun ChatGPTUiScreen(viewModel: ChatViewModel) {
     }
 }
 
-// ======= [4. UI COMPONENT LISTS WITH PROPER BRACKETS] =======
+// ======= [4. UI COMPONENT LISTS] =======
 
 @Composable
 fun HistoryItemRow(history: HistoryChat) {
@@ -260,78 +260,10 @@ fun ChatBubbleRow(message: ChatMessage) {
                         modifier = Modifier.padding(bottom = 2.dp)
                     )
                 }
-                
-                // 🛠️ ဒီနေရာမှစ၍ ပြတ်တောက်သွားသော မူလ Card ကုဒ်ကို ပိတ်ကွင်းများစနစ်တကျဖြင့် ပြန်ဆက်ပေးထားပါသည်
                 Card(
                     shape = RoundedCornerShape(
-                        topStart = 16.dp,
-                        topEnd = 16.dp,
-                        bottomStart = if (isUser) 16.dp else 2.dp,
-                        bottomEnd = if (isUser) 2.dp else 16.dp
+                        topStart = 16.dp, 
+                        topEnd = 16.dp, 
+                        bottomStart = if (isUser) 16.dp else 4.dp, 
+                        bottomEnd = if (isUser) 4.dp else 16.dp
                     ),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (isUser) ChatGPTBlue else ChatGPTBubbleAI
-                    ),
-                    modifier = Modifier.animateContentSize()
-                ) {
-                    Text(
-                        text = message.text,
-                        color = if (isUser) Color.White else ChatGPTTextDark,
-                        fontSize = 16.sp,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-// 🛠️ ကုဒ်အပေါ်ပိုင်းမှာ ခေါ်သုံးထားသော်လည်း အောက်ခြေတွင် ကျန်ရစ်ခဲ့သော မူလ Component အား ဖြည့်စွက်ခြင်း
-@Composable
-fun BottomInputBar(
-    text: String,
-    onTextChange = (String) -> Unit,
-    onSendClick = () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .background(ChatGPTLightBg),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        OutlinedTextField(
-            value = text,
-            onValueChange = onTextChange,
-            placeholder = { Text("Message...", color = ChatGPTHintGray) },
-            modifier = Modifier
-                .weight(1f)
-                .border(1.dp, ChatGPTBorder, RoundedCornerShape(24.dp)),
-            shape = RoundedCornerShape(24.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color.Transparent,
-                unfocusedBorderColor = Color.Transparent,
-                focusedTextColor = ChatGPTTextDark,
-                unfocusedTextColor = ChatGPTTextDark
-            ),
-            trailingIcon = {
-                IconButton(onClick = { /* Voice Dictation Logic */ }) {
-                    Icon(Icons.Default.KeyboardVoice, contentDescription = "Voice", tint = ChatGPTHintGray)
-                }
-            }
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        IconButton(
-            onClick = onSendClick,
-            modifier = Modifier
-                .size(48.dp)
-                .background(ChatGPTBlue, CircleShape)
-        ) {
-            Icon(
-                Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = "Send",
-                tint = Color.White
-            )
-        }
-    }
-}
