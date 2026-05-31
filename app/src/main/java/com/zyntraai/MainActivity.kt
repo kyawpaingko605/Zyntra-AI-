@@ -14,7 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.KeyboardVoice // 🛠️ မဖြစ်မနေ ပါဝင်ပြီးသား အသံဖမ်း Icon သို့ လဲလှယ်ထားသည်
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
@@ -36,13 +36,13 @@ import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.POST
 
-// ပုံထဲကအတိုင်း သန့်စင်တောက်ပသော ကာလာ Palette
-val ChatGPTBlue = Color(0xFF0D6EFD)       // စာပို့ bubble အပြာရောင်
-val ChatGPTLightBg = Color(0xFFFFFFFF)    // နောက်ခံအဖြူရောင်
-val ChatGPTTextDark = Color(0xFF111111)   // စာသားအမည်းရောင်
-val ChatGPTHintGray = Color(0xFF6E6E80)   // စာသားအမှုံရောင်
-val ChatGPTBubbleAI = Color(0xFFF7F7F8)   // AI ရဲ့ မီးခိုးဖျော့ bubble ရောင်
-val ChatGPTBorder = Color(0xFFE5E5E5)     // စည်းကြောင်းအရောင်
+// ChatGPT UI Light Theme Palette
+val ChatGPTBlue = Color(0xFF0D6EFD)       
+val ChatGPTLightBg = Color(0xFFFFFFFF)    
+val ChatGPTTextDark = Color(0xFF111111)   
+val ChatGPTHintGray = Color(0xFF6E6E80)   
+val ChatGPTBubbleAI = Color(0xFFF7F7F8)   
+val ChatGPTBorder = Color(0xFFE5E5E5)     
 
 // ======= [1. BACKEND LOGIC: API NETWORKING] =======
 
@@ -78,7 +78,6 @@ class ChatViewModel : ViewModel() {
     var messages by mutableStateOf(listOf<ChatMessage>())
     var isLoading by mutableStateOf(false)
 
-    // ပုံထဲက နမူနာသမိုင်းကြောင်း Chats စာရင်း
     val chatHistory = listOf(
         HistoryChat("Project Spark Ideas", "3 hours ago"),
         HistoryChat("Vacation Planning", "Yesterday"),
@@ -130,7 +129,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun ChatGPTUiScreen(viewModel: ChatViewModel) {
     var inputMessage by remember { mutableStateOf("") }
-    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -162,7 +160,6 @@ fun ChatGPTUiScreen(viewModel: ChatViewModel) {
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             ) {
-                // ၁။ Chats ရာဇဝင်ခေါင်းစဉ်အပိုင်း
                 item {
                     Text(
                         text = "Chats",
@@ -173,7 +170,6 @@ fun ChatGPTUiScreen(viewModel: ChatViewModel) {
                     )
                 }
 
-                // ၂။ သမိုင်းကြောင်းဖိုင်စာရင်းများ (နမူနာပြအတိုင်း)
                 items(viewModel.chatHistory) { history ->
                     HistoryItemRow(history)
                     HorizontalDivider(color = ChatGPTBorder, thickness = 0.5.dp)
@@ -181,7 +177,6 @@ fun ChatGPTUiScreen(viewModel: ChatViewModel) {
 
                 item { Spacer(modifier = Modifier.height(24.dp)) }
 
-                // ၃။ တကယ့် API စကားပြောခန်း မက်ဆေ့ခ်ျများပြသခြင်း
                 items(viewModel.messages, key = { it.id }) { message ->
                     ChatBubbleRow(message)
                 }
@@ -195,7 +190,7 @@ fun ChatGPTUiScreen(viewModel: ChatViewModel) {
                 }
             }
 
-            // ၄။ အောက်ခြေ အဝိုင်းပုံစံ Input Box Layout
+            // 🛠️ Unresolved reference ဖြစ်စေသော နာမည်လွဲမှားမှုကို ပြင်ဆင်ထားပါသည်
             BottomInputBar(
                 text = inputMessage,
                 onTextChange = { inputMessage = it },
@@ -204,7 +199,7 @@ fun ChatGPTUiScreen(viewModel: ChatViewModel) {
                         val currentText = inputMessage
                         inputMessage = ""
                         viewModel.sendMessage(currentText) {
-                            // စာပို့ပြီးလျှင် auto scroll လုပ်ရန် ဤနေရာ၌ ထိန်းချုပ်နိုင်ပါသည်
+                            // On complete logic
                         }
                     }
                 }
@@ -213,7 +208,7 @@ fun ChatGPTUiScreen(viewModel: ChatViewModel) {
     }
 }
 
-// ======= [၄။ UI COMPONENT တစ်ခုချင်းစီစာရင်း] =======
+// ======= [4. UI COMPONENT LISTS WITH PROPER BRACKETS] =======
 
 @Composable
 fun HistoryItemRow(history: HistoryChat) {
@@ -245,7 +240,6 @@ fun ChatBubbleRow(message: ChatMessage) {
             modifier = Modifier.fillMaxWidth(0.85f)
         ) {
             if (!isUser) {
-                // AI ရဲ့ စက်ဝိုင်းအဝိုင်း Icon လေး
                 Box(
                     modifier = Modifier
                         .size(32.dp)
@@ -259,3 +253,14 @@ fun ChatBubbleRow(message: ChatMessage) {
             }
 
             Column {
+                if (!isUser) {
+                    Text(
+                        text = "AI Assistant", 
+                        fontSize = 14.sp, 
+                        fontWeight = FontWeight.Bold, 
+                        color = ChatGPTBlue,
+                        modifier = Modifier.padding(bottom = 2.dp)
+                    )
+                }
+                Card(
+                    shape = RoundedCornerShape(
