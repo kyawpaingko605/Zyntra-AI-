@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- App ရဲ့ အမည်ကို သတ်မှတ်ခြင်း -->
-    <string name="app_name">Zyntra AI</string>
+    <!-- App ရဲ့ အမည်ကို ChatGPT ဟု သတ်မှတ်ခြင်း -->
+    <string name="app_name">ChatGPT</string>
 </resources>
