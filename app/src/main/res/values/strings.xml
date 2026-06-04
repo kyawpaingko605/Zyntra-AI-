@@ -2,9 +2,4 @@
     - name: Generate Strings XML
       run: |
         mkdir -p app/src/main/res/values
-        cat << 'EOF' > app/src/main/res/values/strings.xml
-        <?xml version="1.0" encoding="utf-8"?>
-        <resources>
-            <string name="app_name">Zyntra AI</string>
-        </resources>
-        EOF
+        printf '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <string name="app_name">Zyntra AI</string>\n</resources>\n' > app/src/main/res/values/strings.xml
