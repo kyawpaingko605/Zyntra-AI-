@@ -20,7 +20,39 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    # 🛠️ ၁။ app/build.gradle.kts ကို စက်ရုပ်စနစ်ဖြင့် အမှားအယွင်းမရှိ တိုက်ရိုက်ဆောက်ခြင်း
+    # 🛠️ ၁။ Root Level settings.gradle.kts ကို တိုက်ရိုက်ဆောက်ခြင်း
+    - name: Generate Root Settings Gradle
+      run: |
+        cat << 'EOF' > settings.gradle.kts
+        pluginManagement {
+            repositories {
+                google()
+                mavenCentral()
+                gradlePluginPortal()
+            }
+        }
+        dependencyResolutionManagement {
+            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+            repositories {
+                google()
+                mavenCentral()
+            }
+        }
+        rootProject.name = "Zyntra AI"
+        include(":app")
+        EOF
+
+    # 🛠️ ၂။ Root Level build.gradle.kts (Plugins Configuration) ကို ဆောက်ခြင်း
+    - name: Generate Root Build Gradle
+      run: |
+        cat << 'EOF' > build.gradle.kts
+        plugins {
+            id("com.android.application") version "8.2.0" apply false
+            id("org.jetbrains.kotlin.android") version "1.9.22" apply false
+        }
+        EOF
+
+    # 🛠️ ၃။ app/build.gradle.kts ကို စက်ရုပ်စနစ်ဖြင့် တိုက်ရိုက်ဆောက်ခြင်း
     - name: Force Generate App Build Gradle
       run: |
         mkdir -p app
@@ -92,19 +124,19 @@ jobs:
         }
         EOF
 
-    # 🛠️ ၂။ AndroidManifest.xml ကို အမှားကင်းစင်အောင် ဆောက်ခြင်း (Base64 အမှန်)
+    # 🛠️ ၄။ AndroidManifest.xml ကို တိုက်ရိုက်ဆောက်ခြင်း (Base64 အမှန်)
     - name: Inject Perfect AndroidManifest.xml
       run: |
         mkdir -p app/src/main
-        echo "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPG1hbmlmZXN0IHhtbG5zOmFuZHJvaWQ9Imh0dHA6Ly9zY2hlbWFzLmFuZHJvaWQuY29tL2Fway9yZXMvYW5kcm9pZCI+CiAgICA8dXNlcy1wZXJtaXNzaW9uIGFuZHJvaWQ6bmFtZT0iYW5kcm9pZC5wZXJtaXNzaW9uLklOVEVSTkVUIiAvPgogICAgPGFwcGxpY2F0aW9uCiAgICAgICAgYW5kcm9pZDphbGxvd0JhY2t1cD0idHJ1ZSIKICAgICAgICBhbmRyb2lkOmxhYmVsPSJAc3RyaW5nL2FwcF9uYW1lIgogICAgICAgIGFuZHJvaWQ6c3VwcG9ydHNSdGw9InRydWUiCiAgICAgICAgYW5kcm9pZDp0aGVtZT0iQGFuZHJvaWQ6c3R5bGUvVGhlbWUuRGV2aWNlRGVmYXVsdC5MaWdodC5Ob0FjdGlvbkJhciI+CiAgICAgICAgPGFjdGl2aXR5CiAgICAgICAgICAgIGFuZHJvaWQ6bmFtZT0iY29tLnp5bnRyYWFpLk1haW5BY3Rpdml0eSIKICAgICAgICAgICAgYW5kcm9pZDpleHBvcnRlZD0idHJ1ZSI+CiAgICAgICAgICAgIDxpbnRlbnQtZmlsdGVyPgogICAgICAgICAgICAgICAgPGFjdGlvbiBhbmRyb2lkOm5hbWU9ImFuZHJvaWQuaW50ZW50LkFDVElPTi5NQUlOIiAvPgogICAgICAgICAgICAgICAgPGNhdGVnb3J5IGFuZHJvaWQ6bmFtZT0iYW5kcm9pZC5pbnRlbnQuQ0FURUdPUlkuTEFVTkNIRVIiIC8+CiAgICAgICAgICAgIDwvaW50ZW50LWZpbHRlcj4KICAgICAgICA8L2FjdGl2aXR5PgogICAgPC9hcHBsaWN0aW9uPgo8L21hbmlmZXN0Pg==" | base64 -d > app/src/main/AndroidManifest.xml
+        echo "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPG1hbmlmZXN0IHhtbG5zOmFuZHJvaWQ9Imh0dHA6Ly9zY2hlbWFzLmFuZHJvaWQuY29tL2Fway9yZXMvYW5kcm9pZCI+CiAgICA8dXNlcy1wZXJtaXNzaW9uIGFuZHJvaWQ6bmFtZT0iYW5kcm9pZC5wZXJtaXNzaW9uLklOVEVSTkVUIiAvPgogICAgPGFwcGxpY2F0aW9uCiAgICAgICAgYW5kcm9pZDphbGxvd0JhY2t1cD0idHJ1ZSIKICAgICAgICBhbmRyb2lkOmxhYmVsPSJAc3RyaW5nL2FwcF9uYW1lIgogICAgICAgIGFuZHJvaWQ6c3VwcG9ydHNSdGw9InRydWUiCiAgICAgICAgYW5kcm9pZDp0aGVtZT0iQGFuZHJvaWQ6c3R5bGUvVGhlbWUuRGV2aWNlRGVmYXVsdC5MaWdodC5Ob0FjdGlvbkJhciI+CiAgICAgICAgPGFjdGl2aXR5CiAgICAgICAgICAgIGFuZHJvaWQ6bmFtZT0iY29tLnp5bnRyYWFpLk1haW5BY3Rpdml0eSIKICAgICAgICAgICAgYW5kcm9pZDpleHBvcnRlZD0idHJ1ZSI+CiAgICAgICAgICAgIDxpbnRlbnQtZmlsdGVyPgogICAgICAgICAgICAgICAgPGFjdGlvbiBhbmRyb2lkOm5hbWU9ImFuZHJvaWQuaW50ZW50LkFDVElPTi5NQUlOIiAvPgogICAgICAgICAgICAgICAgPGNhdGV GomezYSBhbmRyb2lkOm5hbWU9ImFuZHJvaWQuaW50ZW50LkNBVEVHT1JZLkxBVU5DSEVSIiAvPgogICAgICAgICAgICA8L2ludGVudC1maWx0ZXI+CiAgICAgICAgPC9hY3Rpdml0eT4KICAgIDwvYXBwbGljYXRpb24+CjwvbWFuaWZlc3Q+" | base64 -d > app/src/main/AndroidManifest.xml
 
-    # 🛠️ ၃။ AAPT Error ကင်းစင်စေမည့် strings.xml အား ဖန်တီးပေးခြင်း
+    # 🛠️ ၅။ AAPT Error ကင်းစင်စေမည့် strings.xml အား အမှားကင်းစင်သော Base64 ဖြင့်ဆောက်ခြင်း
     - name: Generate Strings XML
       run: |
         mkdir -p app/src/main/res/values
-        echo "PHJlc291cmNlcz4KICAgIDxzdHJpbmcvYXBwX25hbWU+WnludHJhIEFJPC9zdHJpbmc+CjwvcmVzb3VyY2VzPg==" | base64 -d > app/src/main/res/values/strings.xml
+        echo "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHJlc291cmNlcz4KICAgIDxzdHJpbmcgbmFtZT0iYXBwX25hbWUiPlp5bnRyYSBBSTwvc3RyaW5nPgo8L3Jlc291cmNlcz4=" | base64 -d > app/src/main/res/values/strings.xml
 
-    # 🛠️ ၄။ MainActivity.kt ကို တိုက်ရိုက်ဆောက်ခြင်း
+    # 🛠️ ၆။ MainActivity.kt ကို တိုက်ရိုက်ဆောက်ခြင်း
     - name: Generate Proper MainActivity.kt
       run: |
         mkdir -p app/src/main/java/com/zyntraai
@@ -140,15 +172,15 @@ jobs:
         }
         EOF
 
-    # 🛠️ ၅။ Gradle execution permission ပေးခြင်း
+    # 🛠️ ၇။ Gradle execution permission ပေးခြင်း
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    # 🛠️ ၆။ Debug APK တည်ဆောက်ခြင်း
+    # 🛠️ ၈။ Debug APK တည်ဆောက်ခြင်း
     - name: Build Debug APK
       run: ./gradlew assembleDebug
 
-    # 🛠️ ၇။ ထွက်လာတဲ့ APK ကို အားလုံးဒေါင်းလုဒ်ဆွဲနိုင်ရန် GitHub တွင်တင်ပေးခြင်း
+    # 🛠️ ၉။ ထွက်လာတဲ့ APK ကို GitHub Actions တွင် လင့်ခ်တင်ပေးခြင်း
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
