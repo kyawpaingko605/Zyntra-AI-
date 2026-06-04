@@ -114,104 +114,43 @@ jobs:
         import android.os.Bundle
         import androidx.activity.ComponentActivity
         import androidx.activity.compose.setContent
-        import androidx.compose.animation.animateContentSize
-        import androidx.compose.foundation.background
-        import androidx.compose.foundation.border
-        import androidx.compose.foundation.layout.*
-        import androidx.compose.foundation.lazy.LazyColumn
-        import androidx.compose.foundation.lazy.items
-        import androidx.compose.foundation.shape.CircleShape
-        import androidx.compose.foundation.shape.RoundedCornerShape
-        import androidx.compose.material.icons.Icons
-        import androidx.compose.material.icons.automirrored.filled.ArrowForward
-        import androidx.compose.material.icons.filled.Add
-        import androidx.compose.material.icons.filled.Search
-        import androidx.compose.material.icons.filled.Star
-        import androidx.compose.material3.*
-        import androidx.compose.runtime.*
-        import androidx.compose.ui.Alignment
+        import androidx.compose.foundation.layout.fillMaxSize
+        import androidx.compose.material3.MaterialTheme
+        import androidx.compose.material3.Surface
+        import androidx.compose.material3.Text
+        import androidx.compose.runtime.Composable
         import androidx.compose.ui.Modifier
-        import androidx.compose.ui.draw.clip
-        import androidx.compose.ui.graphics.Color
-        import androidx.compose.ui.text.font.FontWeight
-        import androidx.compose.ui.unit.dp
-        import androidx.compose.ui.unit.sp
-        import androidx.lifecycle.ViewModel
-        import androidx.lifecycle.viewmodel.compose.viewModel
-        import kotlinx.coroutines.MainScope
-        import kotlinx.coroutines.launch
-        import retrofit2.Retrofit
-        import retrofit2.converter.gson.GsonConverterFactory
-        import retrofit2.http.Body
-        import retrofit2.http.Header
-        import retrofit2.http.POST
-
-        val ChatGPTBlue = Color(0xFF0D6EFD)       
-        val ChatGPTLightBg = Color(0xFFFFFFFF)    
-        val ChatGPTTextDark = Color(0xFF111111)   
-        val ChatGPTHintGray = Color(0xFF6E6E80)   
-        val ChatGPTBubbleAI = Color(0xFFF7F7F8)   
-        val ChatGPTBorder = Color(0xFFE5E5E5)     
-
-        data class OpenAIRequest(val model: String = "gpt-3.5-turbo", val messages: List<ApiMessage>)
-        data class ApiMessage(val role: String, val content: String)
-        data class OpenAIResponse(val choices: List<Choice>)
-        data class Choice(val message: ApiMessage)
-
-        interface OpenAiService {
-            @POST("v1/chat/completions")
-            suspend fun getChatCompletion(@Header("Authorization") apiKey: String, @Body request: OpenAIRequest): OpenAIResponse
-        }
-
-        object RetrofitClient {
-            val instance: OpenAiService by lazy {
-                Retrofit.Builder()
-                    .baseUrl("https://openai.com")
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build()
-                    .create(OpenAiService::class.java)
-            }
-        }
-
-        data class ChatMessage(val id: String, val text: String, val isUser: Boolean)
-        data class HistoryChat(val title: String, val time: String)
-
-        class ChatViewModel : ViewModel() {
-            var messages by mutableStateOf(listOf<ChatMessage>())
-            var isLoading by mutableStateOf(false)
-            val chatHistory = listOf(
-                HistoryChat("Project Spark Ideas", "3 hours ago"),
-                HistoryChat("Vacation Planning", "Yesterday"),
-                HistoryChat("UI Design Feedback", "2 days ago"),
-                HistoryChat("Recipe for Lasagna", "3 days ago")
-            )
-            private val apiKey = "Bearer ${BuildConfig.OPENAI_API_KEY}" 
-
-            fun sendMessage(text: String, onComplete: () -> Unit) {
-                val userMessage = ChatMessage(id = System.nanoTime().toString(), text = text, isUser = true)
-                messages = messages + userMessage
-                isLoading = true
-                onComplete()
-
-                MainScope().launch {
-                    try {
-                        val apiMessages = messages.map { ApiMessage(role = if (it.isUser) "user" else "assistant", content = it.text) }
-                        val response = RetrofitClient.instance.getChatCompletion(apiKey, OpenAIRequest(messages = apiMessages))
-                        val aiResponseText = response.choices.firstOrNull()?.message?.content ?: "အဖြေမရှိပါ။"
-                        messages = messages + ChatMessage(id = System.nanoTime().toString(), text = aiResponseText, isUser = false)
-                    } catch (e: Exception) {
-                        messages = messages + ChatMessage(id = System.nanoTime().toString(), text = "ချိတ်ဆက်မှု အဆင်မပြေပါ", isUser = false)
-                    } finally {
-                        isLoading = false
-                        onComplete()
-                    }
-                }
-            }
-        }
 
         class MainActivity : ComponentActivity() {
             override fun onCreate(savedInstanceState: Bundle?) {
                 super.onCreate(savedInstanceState)
                 setContent {
                     MaterialTheme {
-                        val myViewModel: ChatViewModel = viewModel()
+                        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                            Greeting("Zyntra AI")
+                        }
+                    }
+                }
+            }
+        }
+
+        @Composable
+        fun Greeting(name: String, modifier: Modifier = Modifier) {
+            Text(text = "Hello $name!", modifier = modifier)
+        }
+        EOF
+
+    # 🛠️ ၅။ Gradle execution permission ပေးခြင်း
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    # 🛠️ ၆။ Debug APK တည်ဆောက်ခြင်း
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug
+
+    # 🛠️ ၇။ ထွက်လာတဲ့ APK ကို အားလုံးဒေါင်းလုဒ်ဆွဲနိုင်ရန် GitHub တွင်တင်ပေးခြင်း
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Zyntra-AI-Debug-APK
+        path: app/build/outputs/apk/debug/app-debug.apk
