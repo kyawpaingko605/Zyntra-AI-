@@ -1,5 +1,0 @@
-    # 🛠️ ၃။ AAPT Error ကင်းစင်စေမည့် strings.xml အား ဖန်တီးပေးခြင်း
-    - name: Generate Strings XML
-      run: |
-        mkdir -p app/src/main/res/values
-        printf '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <string name="app_name">Zyntra AI</string>\n</resources>\n' > app/src/main/res/values/strings.xml
